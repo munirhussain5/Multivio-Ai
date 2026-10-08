@@ -3,13 +3,14 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
+import { GoogleGenAI } from '@google/genai';
 import { AIModelResponse, AIProvider, StudySession } from './src/types';
 import { queryGemini } from './src/services/ai/gemini';
 import { queryOpenAI } from './src/services/ai/openai';
 import { queryClaude } from './src/services/ai/claude';
 import { queryDeepSeek } from './src/services/ai/deepseek';
 import { synthesizeAnswers } from './src/services/ai/synthesizer';
-import { generateLiveEducationalSession } from './src/services/ai/geminiMultiGenerator';
+import { generateLiveEducationalSession, generateLiveFollowUp } from './src/services/ai/geminiMultiGenerator';
 import { generateEducationalResponse, generateFollowUpAnswer } from './src/services/ai/mockGenerator';
 
 dotenv.config();
@@ -193,7 +194,7 @@ async function startServer() {
   });
 
   // Follow-up chat endpoint
-  app.post('/api/followup', (req: Request, res: Response) => {
+  app.post('/api/followup', async (req: Request, res: Response) => {
     try {
       const { session, message, history = [] } = req.body;
       if (!session || !message) {
@@ -201,7 +202,17 @@ async function startServer() {
         return;
       }
 
-      const reply = generateFollowUpAnswer(session, message, history);
+      let reply: string | null = null;
+      try {
+        reply = await generateLiveFollowUp(session, message, history);
+      } catch (liveErr) {
+        console.warn('Live follow-up generation failed, falling back:', liveErr);
+      }
+
+      if (!reply) {
+        reply = generateFollowUpAnswer(session, message, history);
+      }
+
       res.json({
         reply,
         timestamp: Date.now(),
@@ -241,7 +252,7 @@ async function startServer() {
   // Frontend integration via Vite
   if (!isProduction) {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: 'spa',
     });
     app.use(vite.middlewares);

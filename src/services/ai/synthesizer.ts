@@ -73,6 +73,11 @@ Synthesize these perspectives into one unified, student-friendly answer. Return 
                     items: { type: Type.STRING },
                     description: 'Key bullet points for student revision.',
                   },
+                  commonMistakes: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: 'Common misconceptions, student pitfalls, or exam traps and how to avoid them.',
+                  },
                   quickSummary: {
                     type: Type.STRING,
                     description: '1-2 sentence core takeaway for quick memory.',
@@ -126,6 +131,7 @@ Synthesize these perspectives into one unified, student-friendly answer. Return 
                 language: parsed.exampleLanguage || 'typescript',
               },
               importantPoints: parsed.importantPoints || [],
+              commonMistakes: parsed.commonMistakes || [],
               quickSummary: parsed.quickSummary || '',
               practiceQuestions: parsed.practiceQuestions || [],
               consensusSummary: parsed.consensusSummary,

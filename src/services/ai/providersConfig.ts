@@ -94,10 +94,11 @@ Requirements:
 11. Do not claim that information is correct simply because multiple models said it.
 12. Produce an answer suitable for a student.
 
-Structure your answer with:
-- Simple Explanation
-- Detailed Explanation
-- Example
-- Important Points
-- Quick Summary
-- Practice Questions`;
+Structure your answer strictly with these 7 points:
+1. Simple Explanation
+2. Detailed Explanation (Comprehensive comparative synthesis across all AI models: ChatGPT, Gemini, Claude, and DeepSeek, explaining the entire meaningful depth of the question)
+3. Example (Practical application, problem walkthrough or code, with step-by-step breakdown)
+4. Important Points (Key takeaways for student revision)
+5. Common Mistakes (Frequent student pitfalls, misconceptions, and exam traps, and how to avoid them)
+6. Quick Summary (1-2 sentence core takeaway for memory)
+7. Practice Questions (Conceptual practice questions with hints)`;

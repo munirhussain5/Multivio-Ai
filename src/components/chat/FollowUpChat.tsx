@@ -17,6 +17,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
   const [input, setInput] = useState('');
 
   const quickPrompts = [
+    'Explain in full detail by comparing all AI models (ChatGPT, Gemini, Claude, DeepSeek).',
     "I still don't understand, explain using a simpler real-world story.",
     'Show a concise code example in Python.',
     'What are the most common exam questions on this?',

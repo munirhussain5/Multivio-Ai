@@ -42,6 +42,7 @@ export interface SynthesisResult {
   detailedExplanation: string;
   example: ExampleSection;
   importantPoints: string[];
+  commonMistakes?: string[];
   quickSummary: string;
   practiceQuestions: PracticeQuestion[];
   consensusSummary?: string;

@@ -369,6 +369,12 @@ export default function App() {
     handleSendFollowUp('Can you explain this even more simply, using an intuitive everyday story for a beginner?');
   };
 
+  const handleExplainInDetail = () => {
+    showToast('Formulating complete detailed explanation comparing all AI models...');
+    handleSendFollowUp('Please provide a complete detailed explanation of this topic using the official StudyMind 7-point format by comparing all AI models (ChatGPT, Gemini, Claude, DeepSeek). Provide the whole meaningful depth of the question.');
+    scrollToFollowUp();
+  };
+
   const scrollToFollowUp = () => {
     const el = document.getElementById('follow-up-section');
     if (el) {
@@ -660,9 +666,12 @@ export default function App() {
                   <CombinedAnswer
                     synthesis={currentSession.synthesis}
                     question={currentSession.question}
+                    responses={currentSession.responses}
+                    selectedModels={currentSession.selectedModels}
                     onGenerateQuiz={() => setCurrentTab('quiz')}
                     onMakeNotes={() => setCurrentTab('notes')}
                     onExplainMoreSimply={handleExplainMoreSimply}
+                    onExplainInDetail={handleExplainInDetail}
                     onAskFollowUp={scrollToFollowUp}
                     onSaveAnswer={() => showToast('Lesson safely saved in history!')}
                     isSaved={true}

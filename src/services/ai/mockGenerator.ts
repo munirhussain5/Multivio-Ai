@@ -548,6 +548,11 @@ Think of it like an interconnected recipe: specific ingredients or starting cond
       'Identify how changes to starting conditions alter the final output.',
       'Review real-world applications to reinforce long-term understanding.'
     ],
+    commonMistakes: [
+      `Assuming ${topicName} applies unconditionally without verifying prerequisite inputs.`,
+      'Confusing superficial vocabulary with functional cause-and-effect mechanisms.',
+      'Overlooking boundary constraints and edge cases during application.'
+    ],
     quickSummary: `${topicName} provides a clear, reliable explanation of how specific conditions produce predictable, vital outcomes.`,
     practiceQuestions: [
       {
@@ -658,76 +663,140 @@ export function generateFollowUpAnswer(
   history: FollowUpMessage[]
 ): string {
   const q = studentFollowUp.toLowerCase();
+  const topic = extractTopicName(session.question);
+  const synth = session.synthesis;
+
+  // Detail explanation request comparing all AI models
+  if (
+    q.includes('detail') || 
+    q.includes('compare') || 
+    q.includes('all ai') || 
+    q.includes('all model') || 
+    q.includes('studymind format') || 
+    q.includes('format') || 
+    q.includes('deep')
+  ) {
+    const importantPtsFormatted = (synth.importantPoints || [
+      `Foundational definition and mechanism of ${topic}`,
+      `Key operational principles and prerequisite conditions`,
+      `Critical real-world implementation nuances`
+    ]).map((pt, i) => `${i + 1}. **${pt}**`).join('\n');
+
+    const commonMistakesFormatted = (synth.commonMistakes || [
+      `Assuming ${topic} operates without verifying prerequisite conditions.`,
+      `Confusing superficial terminology with actual operational mechanisms.`,
+      `Overlooking boundary conditions and performance trade-offs.`
+    ]).map((m, i) => `${i + 1}. **Mistake:** ${m}\n   *How to avoid:* Verify assumptions and validate edge conditions early.`).join('\n');
+
+    const practiceQsFormatted = (synth.practiceQuestions || [
+      { question: `In your own words, what is the core mechanism of ${topic}?`, hint: 'Think of the simple analogy.' },
+      { question: `What is the most critical mistake students make when studying ${topic}?`, hint: 'Review the common mistakes section.' }
+    ]).map((pq, i) => `**Q${i + 1}.** ${pq.question}\n*💡 Hint:* ${pq.hint || 'Review the foundational principles above.'}`).join('\n\n');
+
+    return `# StudyMind Master Lesson: Detailed Educational Format
+**Topic:** ${topic}
+
+---
+
+### 1. Simple Explanation
+${synth.simpleExplanation || `${topic} is best understood as a systematic principle that provides predictable, structured outcomes from defined inputs.`}
+
+---
+
+### 2. Detailed Explanation (Cross-AI Models Comparison)
+To provide the whole, all the meaningful depth of "${topic}", here is the comprehensive multi-model comparative analysis:
+
+- **ChatGPT Perspective (Structured Syllabus & Taxonomy):**
+  Provides the formal categorization and sequential hierarchy. It defines ${topic} through standardized terminology, establishing strict classifications, clean definitions, and structured numbered operational workflows.
+
+- **Gemini Perspective (Intuitive Mental Models & Analogies):**
+  Provides the conceptual mental model. It explains ${topic} by linking abstract principles to relatable real-world systems, emphasizing why the concept matters holistically and how parts interlock intuitively.
+
+- **Claude Perspective (Academic Rigor & Boundary Conditions):**
+  Provides academic depth and theoretical constraints. It investigates edge cases, formal boundary conditions, subtle nuances, and clarifies common academic misconceptions that trip up advanced students.
+
+- **DeepSeek Perspective (Technical Mechanics & Execution):**
+  Provides low-level mechanical precision. It analyzes execution paths, underlying mathematical/computational/scientific mechanisms, memory layouts, and practical efficiency/performance tradeoffs.
+
+- **Unified Comparative Synthesis:**
+  ${synth.detailedExplanation || `When we bring all four perspectives together, ${topic} emerges as a unified framework. Rather than viewing it in isolation, mastering both the high-level intuitive model (Gemini/ChatGPT) and the deep technical boundary conditions (Claude/DeepSeek) provides complete conceptual mastery.`}
+
+---
+
+### 3. Example
+${synth.example?.codeOrContext ? `\`\`\`${synth.example.language || 'markdown'}\n${synth.example.codeOrContext}\n\`\`\`` : `**Practical Scenario:** Walkthrough of ${topic} in real application.`}
+
+**How it works step-by-step:**
+${synth.example?.explanation || `Each component in this example demonstrates the underlying mechanism of ${topic} in action.`}
+
+---
+
+### 4. Important Points
+${importantPtsFormatted}
+
+---
+
+### 5. Common Mistakes
+${commonMistakesFormatted}
+
+---
+
+### 6. Quick Summary
+${synth.quickSummary || `${topic} establishes a clear, dependable mechanism for turning specific prerequisites into reliable, verifiable outcomes.`}
+
+---
+
+### 7. Practice Questions
+${practiceQsFormatted}`;
+  }
   
   if (q.includes('simple') || q.includes('beginner') || q.includes('easier') || q.includes('5 year old') || q.includes('still don\'t understand')) {
-    return `No problem at all! Let's strip away all the jargon and look at this using a simple real-world story.
+    return `No problem at all! Let's strip away all the technical jargon and understand **${topic}** with a simple real-world picture:
 
-Imagine you are playing a video game where your character has a button labeled **"Interact"**.
+${synth.simpleExplanation}
 
-- When you stand in front of a **Chest** and press "Interact", the chest opens and reveals treasure.
-- When you stand in front of a **NPC Villager** and press "Interact", they speak to you.
-- When you stand in front of a **Vehicle** and press "Interact", you climb into the driver seat.
+Think of it like an everyday mechanism: you don't need to know every tiny gear inside a clock to know how to tell time, but knowing the master hand makes everything clear. 
 
-Notice that your game controller only has **ONE** button: "Interact". You don't have a 50-button controller with a "Chest Button", a "Talk Button", and a "Drive Button". 
-
-The game code simply says: \`target.interact()\`. Each object in the game world knows its own custom behavior!
-
-Does that make the concept click better? Feel free to ask how this translates to code or exams!`;
+Does this intuitive mental picture make **${topic}** click better for you? Feel free to ask about any specific part!`;
   }
 
   if (q.includes('code') || q.includes('python') || q.includes('java') || q.includes('c++') || q.includes('javascript') || q.includes('typescript')) {
-    return `Here is a clear, concise code demonstration illustrating this:
+    if (synth.example?.codeOrContext) {
+      return `Here is the practical implementation demonstrating **${topic}**:
 
-\`\`\`python
-# 1. The common base contract
-class Device:
-    def turn_on(self):
-        pass
-
-# 2. Specialized forms
-class Lamp(Device):
-    def turn_on(self):
-        print("💡 Light illuminates the desk")
-
-class Fan(Device):
-    def turn_on(self):
-        print("💨 Blades spin and generate cool breeze")
-
-# 3. Polymorphic runner
-def power_up_room(devices: list[Device]):
-    for item in devices:
-        item.turn_on() # Notice: one uniform method call!
-
-# Execution:
-room = [Lamp(), Fan()]
-power_up_room(room)
+\`\`\`${synth.example.language || 'python'}
+${synth.example.codeOrContext}
 \`\`\`
 
-Notice that the function \`power_up_room\` never checks \`if type(item) == Lamp\`. It simply calls \`turn_on()\`, and Python dispatches the appropriate method dynamically.`;
+**Step-by-Step Breakdown:**
+${synth.example.explanation}`;
+    }
   }
 
   if (q.includes('exam') || q.includes('test') || q.includes('interview')) {
-    return `For exams and technical interviews, professors and interviewers typically look for these 3 specific points:
+    const pts = (synth.importantPoints || []).slice(0, 3).map((p, i) => `${i + 1}. **${p}**`).join('\n');
+    return `For exams and assessments on **${topic}**, examiners prioritize these core areas:
 
-1. **Definition & Etymology:** Mention "many forms" and explain that it enables a single interface to represent multiple distinct types.
-2. **The 2 Main Types:** Clearly distinguish between:
-   - **Static (Compile-time):** Method overloading and operator overloading.
-   - **Dynamic (Runtime):** Method overriding via virtual methods / interfaces.
-3. **The 'Why':** Explain that it eliminates messy \`switch\` / \`if-else\` cascades and supports the **Open/Closed Principle** (open for extension, closed for modification).
+${pts}
 
-If you include those 3 points plus a 3-line code example, you will reliably earn full marks!`;
+**Key Mistake to Avoid:**
+${synth.commonMistakes?.[0] || 'Overlooking prerequisite conditions and edge cases.'}
+
+**Memory Anchor:**
+${synth.quickSummary}`;
   }
 
-  return `That is a great follow-up question! 
+  return `That is a great follow-up inquiry regarding **${topic}**! 
 
-Building directly on our discussion of **${session.question}**:
+${synth.quickSummary}
 
-When dealing with this in real software systems, the key is keeping the contracts concise. When interfaces are small and focused (adhering to the Interface Segregation Principle), different parts of your program can swap implementations with zero friction.
+Building directly on our lesson:
+When applying this concept, remember that all AI models agree on establishing clear fundamentals first before tackling complex edge cases.
 
-Would you like to explore:
-1. A code example in another programming language?
-2. How to practice with a quiz?
-3. Or generating a printable study sheet with exam points?`;
+Would you like to:
+1. See the **Full Detailed Explanation comparing all AI models**?
+2. Walk through a step-by-step **Example**?
+3. Try **Interactive Practice Questions**?`;
 }
 
 function extractTopicName(text: string): string {
