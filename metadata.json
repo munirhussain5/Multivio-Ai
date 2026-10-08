@@ -1,0 +1,6 @@
+{
+  "name": "StudyMind",
+  "description": "Multi-AI educational learning platform that queries ChatGPT, Gemini, Claude, and DeepSeek, compares perspectives, synthesizes unified explanations, and generates quizzes and study notes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
