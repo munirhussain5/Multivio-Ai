@@ -83,34 +83,59 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             </div>
           </div>
         ) : (
-          session.followUps.map(msg => (
-            <div
-              key={msg.id}
-              className={`flex items-start gap-3 ${
-                msg.sender === 'student' ? 'flex-row-reverse' : ''
-              }`}
-            >
+          session.followUps.map((msg, index) => {
+            const isTargetStyled = index === 2 || msg.sender === 'student';
+            return (
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
-                  msg.sender === 'student'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-indigo-600 text-white'
+                key={msg.id}
+                className={`flex items-start gap-3 ${
+                  msg.sender === 'student' ? 'flex-row-reverse' : ''
                 }`}
               >
-                {msg.sender === 'student' ? <User className="w-4 h-4" /> : <Brain className="w-4 h-4" />}
-              </div>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
+                    msg.sender === 'student'
+                      ? 'bg-[#6273ec] text-white'
+                      : 'bg-indigo-600 text-white'
+                  }`}
+                >
+                  {msg.sender === 'student' ? <User className="w-4 h-4" /> : <Brain className="w-4 h-4" />}
+                </div>
 
-              <div
-                className={`max-w-[85%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
-                  msg.sender === 'student'
-                    ? 'bg-slate-900 text-white rounded-tr-none'
-                    : 'bg-slate-50 border border-slate-200 text-slate-800 rounded-tl-none'
-                }`}
-              >
-                <MarkdownRenderer content={msg.text} />
+                <div
+                  className={`max-w-[85%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
+                    msg.sender === 'student'
+                      ? 'rounded-tr-none'
+                      : 'bg-slate-50 border border-slate-200 text-slate-800 rounded-tl-none'
+                  }`}
+                  style={
+                    isTargetStyled
+                      ? {
+                          backgroundColor: '#6273ec',
+                        }
+                      : undefined
+                  }
+                >
+                  <div
+                    style={
+                      isTargetStyled
+                        ? {
+                            borderColor: '#a2e1e1',
+                            color: '#e6ebf1',
+                          }
+                        : undefined
+                    }
+                    className={isTargetStyled ? '[&_p]:text-[#e6ebf1] [&_p]:border-[#a2e1e1]' : ''}
+                  >
+                    <MarkdownRenderer
+                      content={msg.text}
+                      className={isTargetStyled ? '!text-[#e6ebf1] [&_p]:!text-[#e6ebf1] [&_p]:!border-[#a2e1e1]' : ''}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
 
         {isLoading && (

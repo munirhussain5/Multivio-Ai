@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#1E1B4B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#93C5FD" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Subtle ambient glow -->
+  <circle cx="350" cy="315" r="280" fill="#2563EB" opacity="0.18" />
+  <circle cx="800" cy="315" r="320" fill="#4F46E5" opacity="0.12" />
+
+  <!-- Logo Mark Container -->
+  <rect x="180" y="205" width="220" height="220" rx="55" fill="url(#logoBg)" stroke="#60A5FA" stroke-width="4" />
+  
+  <!-- Brain Icon inside mark -->
+  <g transform="translate(225, 245) scale(0.42)">
+    <path d="M 160 50 C 130 50 100 68 85 96 C 70 88 50 94 40 110 C 26 130 28 158 42 176 C 26 194 24 222 38 242 C 48 256 66 264 82 260 C 95 284 125 300 155 300 L 160 300" 
+          fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 160 50 C 190 50 220 68 235 96 C 250 88 270 94 280 110 C 294 130 292 158 278 176 C 294 194 296 222 282 242 C 272 256 254 264 238 260 C 225 284 195 300 165 300 L 160 300" 
+          fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="85" cy="96" r="14" fill="#34D399" />
+    <circle cx="235" cy="96" r="14" fill="#60A5FA" />
+    <circle cx="42" cy="176" r="14" fill="#FBBF24" />
+    <circle cx="278" cy="176" r="14" fill="#A78BFA" />
+    <circle cx="160" cy="175" r="18" fill="#FFFFFF" />
+    <circle cx="160" cy="175" r="8" fill="#2563EB" />
+  </g>
+
+  <!-- Title & Typography -->
+  <text x="440" y="300" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="84" font-weight="800" fill="url(#textGrad)" letter-spacing="-1">StudyMind</text>
+  <text x="445" y="360" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="30" font-weight="600" fill="#94A3B8" letter-spacing="0">Multi-AI Educational Synthesis Platform</text>
+  <text x="445" y="405" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="22" font-weight="500" fill="#38BDF8">ChatGPT · Gemini · Claude · DeepSeek</text>
+</svg>

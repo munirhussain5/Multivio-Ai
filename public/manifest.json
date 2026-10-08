@@ -1,0 +1,22 @@
+{
+  "name": "StudyMind — Multi-AI Educational Learning Platform",
+  "short_name": "StudyMind",
+  "description": "One question. Multiple AI perspectives. One clear answer. Learn smarter by comparing ChatGPT, Gemini, Claude, and DeepSeek.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/studymind-logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
