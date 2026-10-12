@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <g transform="translate(0, 0)">
+    <!-- LEFT BRAIN HEMISPHERE (Royal Blue) -->
+    <path
+      d="M 248 96
+         C 224 96 200 106 182 124
+         C 164 108 136 108 114 126
+         C 88 148 84 184 98 214
+         C 74 234 70 272 84 302
+         C 72 332 84 370 112 390
+         C 134 406 164 406 186 394
+         C 204 410 230 414 248 412
+         Z"
+      fill="#0062FF"
+    />
+
+    <!-- Left hemisphere white sulci -->
+    <path
+      d="M 184 192 C 196 168 230 168 238 196"
+      stroke="#FFFFFF"
+      stroke-width="15"
+      stroke-linecap="round"
+      fill="none"
+    />
+    <path
+      d="M 148 266 C 136 292 168 346 208 342 C 224 340 232 324 228 308"
+      stroke="#FFFFFF"
+      stroke-width="15"
+      stroke-linecap="round"
+      fill="none"
+    />
+
+    <!-- RIGHT BRAIN HEMISPHERE (Sky Blue) -->
+    <path
+      d="M 264 96
+         C 288 96 312 106 330 124
+         C 348 108 376 108 398 126
+         C 424 148 428 184 414 214
+         C 438 234 442 272 428 302
+         C 440 332 428 370 400 390
+         C 378 406 348 406 326 394
+         C 308 410 282 414 264 412
+         Z"
+      fill="#00A3FF"
+    />
+
+    <!-- Right hemisphere white sulci -->
+    <path
+      d="M 292 160 C 278 182 278 212 304 232 C 324 248 344 268 348 296"
+      stroke="#FFFFFF"
+      stroke-width="15"
+      stroke-linecap="round"
+      fill="none"
+    />
+    <path
+      d="M 284 344 C 288 318 312 298 332 298"
+      stroke="#FFFFFF"
+      stroke-width="15"
+      stroke-linecap="round"
+      fill="none"
+    />
+  </g>
+</svg>

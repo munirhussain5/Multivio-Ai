@@ -384,7 +384,7 @@ export const IntegratedSearchInput: React.FC<IntegratedSearchInputProps> = ({
               placeholder={
                 attachedDocument 
                   ? `Ask anything about ${attachedDocument.name.slice(0, 30)}...` 
-                  : "What do you want to learn today? Or attach lecture slides..."
+                  : "what to want to learn today?"
               }
               className="w-full bg-transparent py-1.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:outline-none"
               disabled={isLoading}

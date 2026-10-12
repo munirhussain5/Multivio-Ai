@@ -19,6 +19,7 @@ import {
   SUPABASE_PROJECT_ID, 
   SUPABASE_URL 
 } from '../../services/supabase/supabaseClient';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 
 interface DashboardViewProps {
   sessions: StudySession[];
@@ -113,7 +114,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs">
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-medium text-slate-500">Topics Studied</span>
-              <Brain className="w-4 h-4 text-blue-600" />
+              <StudyMindLogo className="w-5 h-5" />
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {topicsStudied}

@@ -33,6 +33,7 @@ import {
   signOutUser
 } from './services/supabase/supabaseClient';
 import { generateEducationalResponse, generateFollowUpAnswer } from './services/ai/mockGenerator';
+import { StudyMindLogo } from './components/ui/StudyMindLogo';
 import { 
   Search, 
   Sparkles, 
@@ -573,8 +574,8 @@ export default function App() {
             {/* LOADING STATE */}
             {isLoading && (
               <div className="bg-white rounded-2xl border border-indigo-200 p-8 sm:p-12 text-center shadow-xs animate-pulse">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 mx-auto mb-4">
-                  <Brain className="w-7 h-7 animate-bounce" />
+                <div className="w-14 h-14 rounded-2xl bg-white border border-blue-200 flex items-center justify-center mx-auto mb-4 p-2 shadow-xs">
+                  <StudyMindLogo className="w-10 h-10 animate-bounce" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900">
                   Synthesizing Multi-AI Perspectives
@@ -776,8 +777,8 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Brand & Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sky-200/90 border border-sky-300 flex items-center justify-center text-sky-800 shadow-xs">
-              <Brain className="w-5 h-5 text-sky-700" />
+            <div className="w-10 h-10 rounded-xl bg-white border border-sky-300 flex items-center justify-center p-1 shadow-xs">
+              <StudyMindLogo className="w-8 h-8" />
             </div>
             <div>
               <div className="flex items-center gap-2">

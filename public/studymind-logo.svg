@@ -1,46 +1,90 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="50%" stop-color="#1E1B4B" />
-      <stop offset="100%" stop-color="#0F172A" />
-    </linearGradient>
-    <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1D4ED8" />
-      <stop offset="100%" stop-color="#3B82F6" />
-    </linearGradient>
-    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="100%" stop-color="#93C5FD" />
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500" fill="none">
 
-  <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bg)" />
-
-  <!-- Subtle ambient glow -->
-  <circle cx="350" cy="315" r="280" fill="#2563EB" opacity="0.18" />
-  <circle cx="800" cy="315" r="320" fill="#4F46E5" opacity="0.12" />
-
-  <!-- Logo Mark Container -->
-  <rect x="180" y="205" width="220" height="220" rx="55" fill="url(#logoBg)" stroke="#60A5FA" stroke-width="4" />
-  
-  <!-- Brain Icon inside mark -->
-  <g transform="translate(225, 245) scale(0.42)">
-    <path d="M 160 50 C 130 50 100 68 85 96 C 70 88 50 94 40 110 C 26 130 28 158 42 176 C 26 194 24 222 38 242 C 48 256 66 264 82 260 C 95 284 125 300 155 300 L 160 300" 
-          fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 160 50 C 190 50 220 68 235 96 C 250 88 270 94 280 110 C 294 130 292 158 278 176 C 294 194 296 222 282 242 C 272 256 254 264 238 260 C 225 284 195 300 165 300 L 160 300" 
-          fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
-    <circle cx="85" cy="96" r="14" fill="#34D399" />
-    <circle cx="235" cy="96" r="14" fill="#60A5FA" />
-    <circle cx="42" cy="176" r="14" fill="#FBBF24" />
-    <circle cx="278" cy="176" r="14" fill="#A78BFA" />
-    <circle cx="160" cy="175" r="18" fill="#FFFFFF" />
-    <circle cx="160" cy="175" r="8" fill="#2563EB" />
+  <!-- Radiating Sunburst Rays (Cyan-Blue) -->
+  <g id="sunburst-rays">
+    <line x1="408.0" y1="250.0" x2="448.0" y2="250.0" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="406.1" y1="274.7" x2="427.8" y2="278.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="400.3" y1="298.8" x2="438.3" y2="311.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="390.8" y1="321.7" x2="410.4" y2="331.7" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="377.8" y1="342.9" x2="410.2" y2="366.4" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="361.7" y1="361.7" x2="377.3" y2="377.3" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="342.9" y1="377.8" x2="366.4" y2="410.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="321.7" y1="390.8" x2="331.7" y2="410.4" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="298.8" y1="400.3" x2="311.2" y2="438.3" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="274.7" y1="406.1" x2="278.2" y2="427.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="250.0" y1="408.0" x2="250.0" y2="448.0" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="225.3" y1="406.1" x2="221.8" y2="427.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="201.2" y1="400.3" x2="188.8" y2="438.3" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="178.3" y1="390.8" x2="168.3" y2="410.4" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="157.1" y1="377.8" x2="133.6" y2="410.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="138.3" y1="361.7" x2="122.7" y2="377.3" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="122.2" y1="342.9" x2="89.8" y2="366.4" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="109.2" y1="321.7" x2="89.6" y2="331.7" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="99.7" y1="298.8" x2="61.7" y2="311.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="93.9" y1="274.7" x2="72.2" y2="278.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="92.0" y1="250.0" x2="52.0" y2="250.0" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="93.9" y1="225.3" x2="72.2" y2="221.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="99.7" y1="201.2" x2="61.7" y2="188.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="109.2" y1="178.3" x2="89.6" y2="168.3" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="122.2" y1="157.1" x2="89.8" y2="133.6" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="138.3" y1="138.3" x2="122.7" y2="122.7" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="157.1" y1="122.2" x2="133.6" y2="89.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="178.3" y1="109.2" x2="168.3" y2="89.6" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="201.2" y1="99.7" x2="188.8" y2="61.7" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="225.3" y1="93.9" x2="221.8" y2="72.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="250.0" y1="92.0" x2="250.0" y2="52.0" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="274.7" y1="93.9" x2="278.2" y2="72.2" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="298.8" y1="99.7" x2="311.2" y2="61.7" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="321.7" y1="109.2" x2="331.7" y2="89.6" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="342.9" y1="122.2" x2="366.4" y2="89.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="361.7" y1="138.3" x2="377.3" y2="122.7" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="377.8" y1="157.1" x2="410.2" y2="133.6" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="390.8" y1="178.3" x2="410.4" y2="168.3" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="400.3" y1="201.2" x2="438.3" y2="188.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
+    <line x1="406.1" y1="225.3" x2="427.8" y2="221.8" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" />
   </g>
 
-  <!-- Title & Typography -->
-  <text x="440" y="300" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="84" font-weight="800" fill="url(#textGrad)" letter-spacing="-1">StudyMind</text>
-  <text x="445" y="360" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="30" font-weight="600" fill="#94A3B8" letter-spacing="0">Multi-AI Educational Synthesis Platform</text>
-  <text x="445" y="405" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="22" font-weight="500" fill="#38BDF8">ChatGPT · Gemini · Claude · DeepSeek</text>
+  <!-- LEFT HEMISPHERE (Cyan-Blue #00AEEF) -->
+  <g id="left-hemisphere" stroke="#00AEEF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Center spine -->
+    <line x1="243" y1="118" x2="243" y2="382" />
+
+    <!-- Outer contour -->
+    <path d="M 243 118
+             C 218 116, 202 130, 202 152
+             C 178 148, 160 166, 166 190
+             C 142 194, 132 220, 142 244
+             C 132 262, 140 290, 162 302
+             C 150 324, 170 350, 198 350
+             C 204 368, 224 382, 243 382" />
+
+    <!-- Inner gyri convolutions -->
+    <path d="M 202 152 C 214 172, 230 178, 243 178" />
+    <path d="M 166 190 C 186 200, 210 192, 220 220" />
+    <path d="M 142 244 C 164 244, 184 232, 200 250 C 216 268, 234 260, 243 260" />
+    <path d="M 162 302 C 182 292, 206 306, 224 296" />
+    <path d="M 198 350 C 210 338, 226 346, 243 336" />
+  </g>
+
+  <!-- RIGHT HEMISPHERE (Vivid Magenta #C2187A) -->
+  <g id="right-hemisphere" stroke="#C2187A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Center spine -->
+    <line x1="257" y1="118" x2="257" y2="382" />
+
+    <!-- Outer contour -->
+    <path d="M 257 118
+             C 282 116, 298 130, 298 152
+             C 322 148, 340 166, 334 190
+             C 358 194, 368 220, 358 244
+             C 368 262, 360 290, 338 302
+             C 350 324, 330 350, 302 350
+             C 296 368, 276 382, 257 382" />
+
+    <!-- Inner gyri convolutions -->
+    <path d="M 298 152 C 286 172, 270 178, 257 178" />
+    <path d="M 334 190 C 314 200, 290 192, 280 220" />
+    <path d="M 358 244 C 336 244, 316 232, 300 250 C 284 268, 266 260, 257 260" />
+    <path d="M 338 302 C 318 292, 294 306, 276 296" />
+    <path d="M 302 350 C 290 338, 274 346, 257 336" />
+  </g>
 </svg>

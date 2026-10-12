@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AIModelResponse, AIProvider, SynthesisResult } from '../../types';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 import { CodeBlock } from '../ui/CodeBlock';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 import { 
   GraduationCap, 
   Lightbulb, 
@@ -73,8 +74,8 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
       <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shrink-0">
-              <GraduationCap className="w-6 h-6 text-indigo-300" />
+            <div className="w-10 h-10 rounded-xl bg-white/95 backdrop-blur-sm border border-white/30 flex items-center justify-center shrink-0 p-1 shadow-xs">
+              <StudyMindLogo className="w-8 h-8" />
             </div>
             <div>
               <div className="flex items-center gap-2">

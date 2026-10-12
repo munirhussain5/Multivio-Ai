@@ -14,6 +14,7 @@ import {
   Heart
 } from 'lucide-react';
 import founderImage from '../../assets/images/founder_munir_hussain_1791037943176.jpg';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 
 interface AboutViewProps {
   onStartStudy: () => void;
@@ -74,8 +75,8 @@ export const AboutView: React.FC<AboutViewProps> = ({ onStartStudy }) => {
           <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-[#e0f2fe] border border-sky-300 flex items-center justify-center text-sky-700">
-                  <Brain className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center p-0.5 shadow-2xs">
+                  <StudyMindLogo className="w-5.5 h-5.5" />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   A Message from the Founder

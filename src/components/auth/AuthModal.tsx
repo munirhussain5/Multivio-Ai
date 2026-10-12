@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  Brain, 
   Mail, 
   Lock, 
   User as UserIcon, 
@@ -13,6 +12,7 @@ import {
   Sparkles, 
   X
 } from 'lucide-react';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 import { AuthUser } from '../../types/index';
 import { signUpUser, signInUser } from '../../services/supabase/supabaseClient';
 
@@ -104,26 +104,68 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer"
+            className="absolute top-4 right-4 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors z-20 cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         )}
 
-        {/* Header Banner */}
-        <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 sm:p-8 text-center relative overflow-hidden">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white mx-auto mb-3 shadow-inner">
-            <Brain className="w-6 h-6 text-indigo-200" />
+        {/* Header Banner with Authentic StudyMind Logo */}
+        <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white p-6 sm:p-7 text-center relative overflow-hidden">
+          {/* Subtle soft backdrop glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 bg-blue-500/20 blur-2xl pointer-events-none rounded-full" />
+          
+          {/* Logo badge with authentic StudyMind vector art */}
+          <div className="relative inline-flex items-center justify-center p-2.5 rounded-2xl bg-white shadow-xl shadow-black/30 border border-white/90 mx-auto mb-3">
+            <StudyMindLogo className="w-10 h-10 sm:w-11 sm:h-11" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-            {mode === 'signup' ? 'Create Account' : 'Welcome Back'}
+
+          <div className="text-[11px] font-bold tracking-widest uppercase text-sky-400 mb-1">
+            StudyMind
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+            {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
           </h2>
-          <p className="text-xs sm:text-sm text-indigo-200 mt-1">
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xs mx-auto">
             {mode === 'signup' 
-              ? 'Sign up with your name, email, and password to begin' 
-              : 'Sign in with your email and password to access your lessons'}
+              ? 'Sign up to synthesize lessons, take quizzes, and track progress' 
+              : 'Sign in to access your saved lessons, quizzes, and notes'}
           </p>
+        </div>
+
+        {/* Mode Selector Tabs (Sign In / Sign Up) */}
+        <div className="flex border-b border-slate-200 bg-slate-100/70 p-1.5 gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signin');
+              setErrorMsg(null);
+              setSuccessMsg(null);
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              mode === 'signin'
+                ? 'bg-white text-blue-950 shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <span>Sign In</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signup');
+              setErrorMsg(null);
+              setSuccessMsg(null);
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              mode === 'signup'
+                ? 'bg-white text-blue-950 shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <span>Sign Up</span>
+          </button>
         </div>
 
         {/* Form Body */}
@@ -225,7 +267,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
             >
               {isLoading ? (
                 <>

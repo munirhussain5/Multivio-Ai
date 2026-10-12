@@ -17,6 +17,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { ProviderStatus, AuthUser } from '../../types/index';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 
 export type NavTab = 'study' | 'compare' | 'quiz' | 'notes' | 'history' | 'dashboard' | 'about';
 
@@ -127,8 +128,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleNavClick('study')}
             className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-100 border border-blue-300 flex items-center justify-center text-blue-800 shadow-xs group-hover:scale-105 transition-transform shrink-0">
-              <Brain className="w-5 h-5 text-[#2563EB]" style={{ color: '#2563EB' }} />
+            <div className="w-10 h-10 sm:w-10.5 sm:h-10.5 rounded-xl bg-white border border-blue-200 flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:border-blue-300 transition-all shrink-0 p-1">
+              <StudyMindLogo className="w-8 h-8 sm:w-8.5 sm:h-8.5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -289,8 +290,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavClick('study')}
                 className="flex items-center gap-2.5 cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#e0f2fe] border border-sky-300 flex items-center justify-center text-sky-800 shadow-xs">
-                  <Brain className="w-4.5 h-4.5 text-sky-700" />
+                <div className="w-8.5 h-8.5 rounded-lg bg-white border border-blue-200 flex items-center justify-center p-0.5 shadow-2xs">
+                  <StudyMindLogo className="w-7 h-7" />
                 </div>
                 <div>
                   <span className="font-bold text-base text-slate-900">StudyMind</span>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Sparkles, Brain, CheckCircle2, Layers, BookOpen, GraduationCap } from 'lucide-react';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 
 interface QuickGuideModalProps {
   isOpen: boolean;
@@ -54,10 +55,10 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({ isOpen, onClos
         className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-indigo-900 to-slate-900 text-white flex items-center justify-between">
+        <div className="p-6 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-indigo-300" />
+            <div className="w-9.5 h-9.5 rounded-xl bg-white border border-white/80 flex items-center justify-center p-1 shadow-xs">
+              <StudyMindLogo className="w-7.5 h-7.5" />
             </div>
             <div>
               <h3 className="font-bold text-base sm:text-lg">How StudyMind Works</h3>

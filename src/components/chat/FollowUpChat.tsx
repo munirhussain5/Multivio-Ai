@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FollowUpMessage, StudySession } from '../../types';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 import { Send, Sparkles, User, Brain, CornerDownLeft, Loader2 } from 'lucide-react';
+import { StudyMindLogo } from '../ui/StudyMindLogo';
 
 interface FollowUpChatProps {
   session: StudySession;
@@ -42,8 +43,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
       {/* Header */}
       <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700">
-            <Brain className="w-4 h-4" />
+          <div className="w-8.5 h-8.5 rounded-lg bg-white border border-blue-200 flex items-center justify-center p-0.5 shadow-2xs">
+            <StudyMindLogo className="w-6.5 h-6.5" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">
@@ -96,10 +97,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
                     msg.sender === 'student'
                       ? 'bg-[#6273ec] text-white'
-                      : 'bg-indigo-600 text-white'
+                      : 'bg-white border border-blue-200 p-0.5 shadow-2xs'
                   }`}
                 >
-                  {msg.sender === 'student' ? <User className="w-4 h-4" /> : <Brain className="w-4 h-4" />}
+                  {msg.sender === 'student' ? <User className="w-4 h-4" /> : <StudyMindLogo className="w-6 h-6" />}
                 </div>
 
                 <div
@@ -155,7 +156,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Ask a follow-up (e.g. 'Can you give an example in C++?' or 'Explain like I am 12')..."
+            placeholder="Ask to improve"
             className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
             disabled={isLoading}
           />
