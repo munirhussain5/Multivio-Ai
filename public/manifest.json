@@ -1,6 +1,6 @@
 {
-  "name": "StudyMind — Multi-AI Educational Learning Platform",
-  "short_name": "StudyMind",
+  "name": "Multivio — Multi-AI Educational Learning Platform",
+  "short_name": "Multivio",
   "description": "One question. Multiple AI perspectives. One clear answer. Learn smarter by comparing ChatGPT, Gemini, Claude, and DeepSeek.",
   "start_url": "/",
   "display": "standalone",
@@ -14,7 +14,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/studymind-logo.svg",
+      "src": "/multivio-logo.svg",
       "sizes": "512x512",
       "type": "image/svg+xml"
     }

@@ -17,7 +17,7 @@ if (!process.env.__TSX_LOADED__ && !process.execArgv.some(arg => arg.includes('t
 } else {
   const { startServer } = await import('./src/serverCore.ts');
   startServer().catch((err) => {
-    console.error('Failed to start StudyMind server:', err);
+    console.error('Failed to start Multivio server:', err);
     process.exit(1);
   });
 }

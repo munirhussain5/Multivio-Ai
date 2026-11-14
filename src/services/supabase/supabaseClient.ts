@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { StudySession, StudyNote, AuthUser } from '../../types/index';
 
-// Supabase project credentials provided for StudyMind
+// Supabase project credentials provided for Multivio
 export const SUPABASE_PROJECT_ID = 'uxjlcvmgdnrvbwiczvgx';
 
 const rawUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || 
@@ -154,7 +154,7 @@ export async function syncNoteToSupabase(sessionTitle: string, note: StudyNote):
   }
 }
 
-const AUTH_USER_KEY = 'studymind_auth_user';
+const AUTH_USER_KEY = 'multivio_auth_user';
 
 export function getStoredUser(): AuthUser | null {
   try {
@@ -222,7 +222,7 @@ export async function signUpUser(
         storeUser(authUser);
         return { 
           user: authUser, 
-          message: 'Account created! Welcome to StudyMind.' 
+          message: 'Account created! Welcome to Multivio.' 
         };
       }
     }

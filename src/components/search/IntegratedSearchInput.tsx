@@ -391,7 +391,7 @@ export const IntegratedSearchInput: React.FC<IntegratedSearchInputProps> = ({
             />
           </div>
 
-          {/* Action Buttons: Lecture Options + Ask StudyMind */}
+          {/* Action Buttons: Lecture Options + Ask Multivio */}
           <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto w-full sm:w-auto">
             {/* Options for Lectures Dropdown Trigger */}
             <div className="relative flex-1 sm:flex-none">
@@ -499,7 +499,7 @@ export const IntegratedSearchInput: React.FC<IntegratedSearchInputProps> = ({
               )}
             </div>
 
-            {/* Ask StudyMind Submit Button */}
+            {/* Ask Multivio Submit Button */}
             <button
               onClick={onSubmit}
               disabled={(!question.trim() && !attachedDocument) || isLoading}
@@ -513,7 +513,7 @@ export const IntegratedSearchInput: React.FC<IntegratedSearchInputProps> = ({
                 </>
               ) : (
                 <>
-                  <span>Ask StudyMind</span>
+                  <span>Ask Multivio</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

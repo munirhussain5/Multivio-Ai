@@ -19,7 +19,7 @@ import {
   SUPABASE_PROJECT_ID, 
   SUPABASE_URL 
 } from '../../services/supabase/supabaseClient';
-import { StudyMindLogo } from '../ui/StudyMindLogo';
+import { MultivioLogo } from '../ui/MultivioLogo';
 
 interface DashboardViewProps {
   sessions: StudySession[];
@@ -76,7 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Student Learning Hub
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">
-            Welcome back to StudyMind!
+            Welcome back to Multivio!
           </h2>
           <p className="text-sm sm:text-base text-indigo-200 mt-2 leading-relaxed">
             Your cross-model educational center. Compare ChatGPT, Gemini, Claude, and DeepSeek to master any subject with maximum retention.
@@ -114,7 +114,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs">
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-medium text-slate-500">Topics Studied</span>
-              <StudyMindLogo className="w-5 h-5" />
+              <MultivioLogo className="w-5 h-5" />
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {topicsStudied}

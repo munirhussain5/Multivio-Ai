@@ -24,7 +24,7 @@ export async function synthesizeAnswers(
         .map(([provider, res]) => `=== ${res.modelName || provider} ===\n${res.answer}`)
         .join('\n\n');
 
-      const prompt = `You are the StudyMind educational answer synthesizer.
+      const prompt = `You are the Multivio educational answer synthesizer.
 
 The student asked:
 "${question}"

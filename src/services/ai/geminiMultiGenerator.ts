@@ -63,13 +63,13 @@ export async function generateLiveEducationalSession(
     ? `\n\nATTACHED LECTURE DOCUMENT (${document.name}):\n"""\n${document.text.slice(0, 7000)}\n"""` 
     : '';
 
-  const prompt = `You are StudyMind, an advanced educational AI tutor platform.
+  const prompt = `You are Multivio, an advanced educational AI tutor platform.
 A student asked:
 "${question}"${docContext}
 
 Generate a comprehensive educational study lesson that directly answers the student's question across multiple AI perspectives.
 
-The StudyMind combined answer MUST strictly follow these 7 points:
+The Multivio combined answer MUST strictly follow these 7 points:
 1. "simpleExplanation": 2-3 beginner-friendly sentences using an intuitive everyday analogy.
 2. "detailedExplanation": Deep, comprehensive explanation providing the whole, all the meaningful depth of the question. You MUST explicitly synthesize and compare all AI models under clear comparative subheadings:
    - **ChatGPT Perspective (Structured Syllabus & Taxonomy)**: Formal definitions, classifications, and standard hierarchical workflow.
@@ -312,15 +312,15 @@ export async function generateLiveFollowUp(
   let prompt = '';
 
   if (isDetailRequest) {
-    prompt = `You are StudyMind, an advanced educational AI tutor.
+    prompt = `You are Multivio, an advanced educational AI tutor.
 The student has requested a FULL DETAILED EXPLANATION comparing all AI models for the lesson topic:
 "${session.question}"
 
 Student's prompt: "${userMessage}"
 
-You MUST answer using the official StudyMind 7-point detail format, providing the whole, all meaningful depth of the question by comparing all AI models:
+You MUST answer using the official Multivio 7-point detail format, providing the whole, all meaningful depth of the question by comparing all AI models:
 
-# StudyMind Detailed Educational Master Lesson
+# Multivio Detailed Educational Master Lesson
 
 ### 1. Simple Explanation
 2-3 beginner-friendly sentences using an intuitive everyday analogy.
@@ -351,9 +351,9 @@ List 3-4 frequent misconceptions, common exam traps, and student pitfalls, expla
 
 Format your entire response cleanly with clear Markdown headings.`;
   } else {
-    const historyContext = history.slice(-4).map(h => `${h.sender === 'student' ? 'Student' : 'StudyMind'}: ${h.text}`).join('\n');
+    const historyContext = history.slice(-4).map(h => `${h.sender === 'student' ? 'Student' : 'Multivio'}: ${h.text}`).join('\n');
 
-    prompt = `You are StudyMind, an advanced educational tutor assistant.
+    prompt = `You are Multivio, an advanced educational tutor assistant.
 Current Lesson Topic: "${session.question}"
 Recent Conversation:
 ${historyContext}

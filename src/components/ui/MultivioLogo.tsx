@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 
-interface StudyMindLogoProps {
+interface MultivioLogoProps {
   className?: string;
   size?: number | string;
   alt?: string;
 }
 
-export const StudyMindLogo: React.FC<StudyMindLogoProps> = ({ 
+export const MultivioLogo: React.FC<MultivioLogoProps> = ({ 
   className = "w-9 h-9", 
   size,
-  alt = "StudyMind Logo"
+  alt = "Multivio Logo"
 }) => {
   const [imgError, setImgError] = useState(false);
   const dimensionProps = size ? { width: size, height: size } : {};
@@ -30,7 +30,7 @@ export const StudyMindLogo: React.FC<StudyMindLogoProps> = ({
   if (!imgError) {
     return (
       <img
-        src="/studymind-logo.png"
+        src="/multivio-logo.png"
         alt={alt}
         className={`object-contain inline-block shrink-0 select-none ${className}`}
         {...dimensionProps}

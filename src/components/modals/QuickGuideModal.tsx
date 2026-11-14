@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Sparkles, Brain, CheckCircle2, Layers, BookOpen, GraduationCap } from 'lucide-react';
-import { StudyMindLogo } from '../ui/StudyMindLogo';
+import { MultivioLogo } from '../ui/MultivioLogo';
 
 interface QuickGuideModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({ isOpen, onClos
     {
       num: '04',
       title: 'One Clear Unified Lesson',
-      desc: 'The StudyMind synthesizer creates a structured explanation with simple language, analogies, runnable code, and exam takeaways.',
+      desc: 'The Multivio synthesizer creates a structured explanation with simple language, analogies, runnable code, and exam takeaways.',
       icon: GraduationCap,
       color: 'text-amber-600',
     },
@@ -58,10 +58,10 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({ isOpen, onClos
         <div className="p-6 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9.5 h-9.5 rounded-xl bg-white border border-white/80 flex items-center justify-center p-1 shadow-xs">
-              <StudyMindLogo className="w-7.5 h-7.5" />
+              <MultivioLogo className="w-7.5 h-7.5" />
             </div>
             <div>
-              <h3 className="font-bold text-base sm:text-lg">How StudyMind Works</h3>
+              <h3 className="font-bold text-base sm:text-lg">How Multivio Works</h3>
               <p className="text-xs text-indigo-200">
                 "One question. Multiple AI perspectives. One clear answer."
               </p>

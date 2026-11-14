@@ -12,7 +12,7 @@ import {
   Sparkles, 
   X
 } from 'lucide-react';
-import { StudyMindLogo } from '../ui/StudyMindLogo';
+import { MultivioLogo } from '../ui/MultivioLogo';
 import { AuthUser } from '../../types/index';
 import { signUpUser, signInUser } from '../../services/supabase/supabaseClient';
 
@@ -111,18 +111,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         )}
 
-        {/* Header Banner with Authentic StudyMind Logo */}
+        {/* Header Banner with Authentic Multivio Logo */}
         <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white p-6 sm:p-7 text-center relative overflow-hidden">
           {/* Subtle soft backdrop glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 bg-blue-500/20 blur-2xl pointer-events-none rounded-full" />
           
-          {/* Logo badge with authentic StudyMind vector art */}
+          {/* Logo badge with authentic Multivio vector art */}
           <div className="relative inline-flex items-center justify-center p-2.5 rounded-2xl bg-white shadow-xl shadow-black/30 border border-white/90 mx-auto mb-3">
-            <StudyMindLogo className="w-10 h-10 sm:w-11 sm:h-11" />
+            <MultivioLogo className="w-10 h-10 sm:w-11 sm:h-11" />
           </div>
 
           <div className="text-[11px] font-bold tracking-widest uppercase text-sky-400 mb-1">
-            StudyMind
+            Multivio
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
             {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}

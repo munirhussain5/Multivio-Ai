@@ -75,7 +75,7 @@ When answering a student's question:
 
 The response should be structured, accurate, educational, and easy to study.`;
 
-export const SYNTHESIS_SYSTEM_PROMPT = `You are the StudyMind educational answer synthesizer.
+export const SYNTHESIS_SYSTEM_PROMPT = `You are the Multivio educational answer synthesizer.
 
 The student asked a question, and multiple AI models provided individual responses.
 Your mission is to create one unified, high-quality educational answer.

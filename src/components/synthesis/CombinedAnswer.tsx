@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AIModelResponse, AIProvider, SynthesisResult } from '../../types';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 import { CodeBlock } from '../ui/CodeBlock';
-import { StudyMindLogo } from '../ui/StudyMindLogo';
+import { MultivioLogo } from '../ui/MultivioLogo';
 import { 
   GraduationCap, 
   Lightbulb, 
@@ -55,7 +55,7 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
   const [activeModelPill, setActiveModelPill] = useState<AIProvider | 'all'>('all');
 
   const handleShare = () => {
-    const textToCopy = `StudyMind Educational Answer: ${question}\n\nSummary:\n${synthesis.quickSummary}\n\nFull explanation on StudyMind.`;
+    const textToCopy = `Multivio Educational Answer: ${question}\n\nSummary:\n${synthesis.quickSummary}\n\nFull explanation on Multivio.`;
     navigator.clipboard.writeText(textToCopy);
     setCopiedShare(true);
     setTimeout(() => setCopiedShare(false), 2000);
@@ -75,12 +75,12 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/95 backdrop-blur-sm border border-white/30 flex items-center justify-center shrink-0 p-1 shadow-xs">
-              <StudyMindLogo className="w-8 h-8" />
+              <MultivioLogo className="w-8 h-8" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg sm:text-xl font-bold tracking-tight">
-                  StudyMind Master Lesson
+                  Multivio Master Lesson
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 text-[10px] font-semibold uppercase tracking-wider">
                   7-Point Format

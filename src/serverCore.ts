@@ -265,6 +265,6 @@ export async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`StudyMind server running on port ${PORT}`);
+    console.log(`Multivio server running on port ${PORT}`);
   });
 }

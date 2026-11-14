@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FollowUpMessage, StudySession } from '../../types';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 import { Send, Sparkles, User, Brain, CornerDownLeft, Loader2 } from 'lucide-react';
-import { StudyMindLogo } from '../ui/StudyMindLogo';
+import { MultivioLogo } from '../ui/MultivioLogo';
 
 interface FollowUpChatProps {
   session: StudySession;
@@ -44,7 +44,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
       <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8.5 h-8.5 rounded-lg bg-white border border-blue-200 flex items-center justify-center p-0.5 shadow-2xs">
-            <StudyMindLogo className="w-6.5 h-6.5" />
+            <MultivioLogo className="w-6.5 h-6.5" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">
@@ -65,7 +65,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
               Have questions about this lesson?
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              Ask StudyMind anything you're uncertain about, or click a quick prompt below:
+              Ask Multivio anything you're uncertain about, or click a quick prompt below:
             </p>
 
             {/* Quick Prompts */}
@@ -100,7 +100,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                       : 'bg-white border border-blue-200 p-0.5 shadow-2xs'
                   }`}
                 >
-                  {msg.sender === 'student' ? <User className="w-4 h-4" /> : <StudyMindLogo className="w-6 h-6" />}
+                  {msg.sender === 'student' ? <User className="w-4 h-4" /> : <MultivioLogo className="w-6 h-6" />}
                 </div>
 
                 <div
@@ -144,7 +144,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
               <Loader2 className="w-4 h-4 animate-spin" />
             </div>
-            <span>StudyMind is formulating your personalized clarification...</span>
+            <span>Multivio is formulating your personalized clarification...</span>
           </div>
         )}
       </div>

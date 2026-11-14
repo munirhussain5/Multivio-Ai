@@ -17,7 +17,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { ProviderStatus, AuthUser } from '../../types/index';
-import { StudyMindLogo } from '../ui/StudyMindLogo';
+import { MultivioLogo } from '../ui/MultivioLogo';
 
 export type NavTab = 'study' | 'compare' | 'quiz' | 'notes' | 'history' | 'dashboard' | 'about';
 
@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     {
       id: 'about' as NavTab,
       label: 'About',
-      description: 'Munir Hussain & StudyMind',
+      description: 'Munir Hussain & Multivio',
       icon: User,
       disabled: false,
     },
@@ -129,11 +129,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none"
           >
             <div className="w-10 h-10 sm:w-10.5 sm:h-10.5 rounded-xl bg-white border border-blue-200 flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:border-blue-300 transition-all shrink-0 p-1">
-              <StudyMindLogo className="w-8 h-8 sm:w-8.5 sm:h-8.5" />
+              <MultivioLogo className="w-8 h-8 sm:w-8.5 sm:h-8.5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-bold text-base sm:text-lg text-slate-900 tracking-tight">StudyMind</span>
+                <span className="font-bold text-base sm:text-lg text-slate-900 tracking-tight">Multivio</span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-slate-500 hidden xs:block">Multi-AI Educational Synthesis</p>
             </div>
@@ -186,7 +186,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onOpenQuickGuide}
               type="button"
               className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-              title="How StudyMind Works"
+              title="How Multivio Works"
             >
               <HelpCircle className="w-4 h-4 text-slate-400" />
               <span className="font-medium">Guide</span>
@@ -291,10 +291,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="flex items-center gap-2.5 cursor-pointer"
               >
                 <div className="w-8.5 h-8.5 rounded-lg bg-white border border-blue-200 flex items-center justify-center p-0.5 shadow-2xs">
-                  <StudyMindLogo className="w-7 h-7" />
+                  <MultivioLogo className="w-7 h-7" />
                 </div>
                 <div>
-                  <span className="font-bold text-base text-slate-900">StudyMind</span>
+                  <span className="font-bold text-base text-slate-900">Multivio</span>
                   <p className="text-[10px] text-slate-400">Navigation Menu</p>
                 </div>
               </div>
@@ -424,7 +424,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <HelpCircle className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold">How StudyMind Works</div>
+                    <div className="text-sm font-semibold">How Multivio Works</div>
                     <div className="text-[11px] text-slate-500">Quick 5-step overview</div>
                   </div>
                 </button>

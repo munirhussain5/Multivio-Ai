@@ -33,7 +33,7 @@ import {
   signOutUser
 } from './services/supabase/supabaseClient';
 import { generateEducationalResponse, generateFollowUpAnswer } from './services/ai/mockGenerator';
-import { StudyMindLogo } from './components/ui/StudyMindLogo';
+import { MultivioLogo } from './components/ui/MultivioLogo';
 import { 
   Search, 
   Sparkles, 
@@ -54,7 +54,7 @@ import {
   FileText
 } from 'lucide-react';
 
-const STORAGE_KEY = 'studymind_sessions_v1';
+const STORAGE_KEY = 'multivio_sessions_v1';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('study');
@@ -85,7 +85,7 @@ export default function App() {
     setCurrentUser(user);
     storeUser(user);
     setIsAuthModalOpen(false);
-    showToast(`Welcome to StudyMind, ${user.name}!`);
+    showToast(`Welcome to Multivio, ${user.name}!`);
   };
 
   const handleSignOut = async () => {
@@ -170,7 +170,7 @@ export default function App() {
   };
 
   // Main Ask handler
-  const handleAskStudyMind = async (overrideQuestion?: string) => {
+  const handleAskMultivio = async (overrideQuestion?: string) => {
     let q = (overrideQuestion || question).trim();
     if (!q && attachedDocument) {
       q = `Analyze and explain key lecture concepts from: ${attachedDocument.name}`;
@@ -277,7 +277,7 @@ export default function App() {
 
       const botMsg: FollowUpMessage = {
         id: `msg-bot-${Date.now()}`,
-        sender: 'studymind',
+        sender: 'multivio',
         text: replyText,
         timestamp: Date.now(),
       };
@@ -294,7 +294,7 @@ export default function App() {
       const replyText = generateFollowUpAnswer(sessionWithUserMsg, userMessage, sessionWithUserMsg.followUps);
       const botMsg: FollowUpMessage = {
         id: `msg-bot-${Date.now()}`,
-        sender: 'studymind',
+        sender: 'multivio',
         text: replyText,
         timestamp: Date.now(),
       };
@@ -363,7 +363,7 @@ export default function App() {
   const handleTryExample = () => {
     const sample = samplePrompts[0];
     setQuestion(sample);
-    handleAskStudyMind(sample);
+    handleAskMultivio(sample);
   };
 
   const handleExplainMoreSimply = () => {
@@ -372,7 +372,7 @@ export default function App() {
 
   const handleExplainInDetail = () => {
     showToast('Formulating complete detailed explanation comparing all AI models...');
-    handleSendFollowUp('Please provide a complete detailed explanation of this topic using the official StudyMind 7-point format by comparing all AI models (ChatGPT, Gemini, Claude, DeepSeek). Provide the whole meaningful depth of the question.');
+    handleSendFollowUp('Please provide a complete detailed explanation of this topic using the official Multivio 7-point format by comparing all AI models (ChatGPT, Gemini, Claude, DeepSeek). Provide the whole meaningful depth of the question.');
     scrollToFollowUp();
   };
 
@@ -420,7 +420,7 @@ export default function App() {
             onAskTopic={topic => {
               setQuestion(topic);
               setCurrentTab('study');
-              handleAskStudyMind(topic);
+              handleAskMultivio(topic);
             }}
           />
         )}
@@ -452,12 +452,12 @@ export default function App() {
               <FileQuestion className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-slate-800">No active quiz yet</h3>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                Ask any educational question first, and StudyMind will formulate an interactive quiz tailored to your lesson!
+                Ask any educational question first, and Multivio will formulate an interactive quiz tailored to your lesson!
               </p>
               <button
                 onClick={() => {
                   setQuestion('Explain polymorphism in OOP');
-                  handleAskStudyMind('Explain polymorphism in OOP');
+                  handleAskMultivio('Explain polymorphism in OOP');
                 }}
                 className="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer"
               >
@@ -484,7 +484,7 @@ export default function App() {
               <button
                 onClick={() => {
                   setQuestion('Explain polymorphism in OOP');
-                  handleAskStudyMind('Explain polymorphism in OOP');
+                  handleAskMultivio('Explain polymorphism in OOP');
                 }}
                 className="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer"
               >
@@ -526,7 +526,7 @@ export default function App() {
                   setQuestion={setQuestion}
                   attachedDocument={attachedDocument}
                   setAttachedDocument={setAttachedDocument}
-                  onSubmit={() => handleAskStudyMind()}
+                  onSubmit={() => handleAskMultivio()}
                   isLoading={isLoading}
                 />
 
@@ -539,7 +539,7 @@ export default function App() {
                         key={idx}
                         onClick={() => {
                           setQuestion(sp);
-                          handleAskStudyMind(sp);
+                          handleAskMultivio(sp);
                         }}
                         disabled={isLoading}
                         type="button"
@@ -575,7 +575,7 @@ export default function App() {
             {isLoading && (
               <div className="bg-white rounded-2xl border border-indigo-200 p-8 sm:p-12 text-center shadow-xs animate-pulse">
                 <div className="w-14 h-14 rounded-2xl bg-white border border-blue-200 flex items-center justify-center mx-auto mb-4 p-2 shadow-xs">
-                  <StudyMindLogo className="w-10 h-10 animate-bounce" />
+                  <MultivioLogo className="w-10 h-10 animate-bounce" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900">
                   Synthesizing Multi-AI Perspectives
@@ -662,7 +662,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 1. Combined StudyMind Answer (Featured Prominently) */}
+                {/* 1. Combined Multivio Answer (Featured Prominently) */}
                 {(viewMode === 'combined' || viewMode === 'both') && (
                   <CombinedAnswer
                     synthesis={currentSession.synthesis}
@@ -732,7 +732,7 @@ export default function App() {
                       No More 4-Tab Juggling
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Enter your homework or study question once. StudyMind queries ChatGPT, Gemini, Claude, and DeepSeek simultaneously.
+                      Enter your homework or study question once. Multivio queries ChatGPT, Gemini, Claude, and DeepSeek simultaneously.
                     </p>
                   </div>
 
@@ -744,7 +744,7 @@ export default function App() {
                       Critical Synthesis & Consensus
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      StudyMind eliminates conflicting fluff and synthesizes one verified, structured lesson with analogies and step-by-step code.
+                      Multivio eliminates conflicting fluff and synthesizes one verified, structured lesson with analogies and step-by-step code.
                     </p>
                   </div>
 
@@ -778,11 +778,11 @@ export default function App() {
           {/* Brand & Logo */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white border border-sky-300 flex items-center justify-center p-1 shadow-xs">
-              <StudyMindLogo className="w-8 h-8" />
+              <MultivioLogo className="w-8 h-8" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-sky-950">StudyMind</span>
+                <span className="font-bold text-sm text-sky-950">Multivio</span>
                 <span className="text-sky-400">·</span>
                 <span className="text-sky-800">"One question. Multiple AI perspectives. One clear answer."</span>
               </div>

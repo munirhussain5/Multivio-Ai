@@ -672,7 +672,7 @@ export function generateFollowUpAnswer(
     q.includes('compare') || 
     q.includes('all ai') || 
     q.includes('all model') || 
-    q.includes('studymind format') || 
+    q.includes('multivio format') || 
     q.includes('format') || 
     q.includes('deep')
   ) {
@@ -693,7 +693,7 @@ export function generateFollowUpAnswer(
       { question: `What is the most critical mistake students make when studying ${topic}?`, hint: 'Review the common mistakes section.' }
     ]).map((pq, i) => `**Q${i + 1}.** ${pq.question}\n*💡 Hint:* ${pq.hint || 'Review the foundational principles above.'}`).join('\n\n');
 
-    return `# StudyMind Master Lesson: Detailed Educational Format
+    return `# Multivio Master Lesson: Detailed Educational Format
 **Topic:** ${topic}
 
 ---

@@ -52,7 +52,7 @@ export interface SynthesisResult {
 
 export interface FollowUpMessage {
   id: string;
-  sender: 'student' | 'studymind' | 'system';
+  sender: 'student' | 'multivio' | 'system';
   text: string;
   timestamp: number;
   providerPerspective?: AIProvider;
