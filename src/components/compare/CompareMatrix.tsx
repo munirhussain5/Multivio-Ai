@@ -90,10 +90,10 @@ export const CompareMatrix: React.FC<CompareMatrixProps> = ({
 
       {/* Comparative Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {selectedModels.map(provider => {
+        {(selectedModels || []).map(provider => {
           const info = AI_MODELS[provider];
-          const res = responses[provider];
-          if (!res) return null;
+          const res = responses?.[provider];
+          if (!res || !info) return null;
 
           return (
             <div 
@@ -118,7 +118,13 @@ export const CompareMatrix: React.FC<CompareMatrixProps> = ({
 
               {/* Scrollable text body */}
               <div className="p-4 max-h-96 overflow-y-auto text-xs text-slate-700 leading-relaxed border-b border-slate-100">
-                <MarkdownRenderer content={res.answer} />
+                {res.status === 'success' && res.answer ? (
+                  <MarkdownRenderer content={res.answer} />
+                ) : (
+                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+                    {res.error || 'Provider unavailable for this request.'}
+                  </div>
+                )}
               </div>
 
               {/* Footer strength badge */}

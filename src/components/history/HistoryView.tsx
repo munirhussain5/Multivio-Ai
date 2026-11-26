@@ -33,8 +33,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   const [editTitle, setEditTitle] = useState('');
 
   const filtered = sessions.filter(s => 
-    s.question.toLowerCase().includes(search.toLowerCase()) ||
-    s.title.toLowerCase().includes(search.toLowerCase())
+    (s.question || '').toLowerCase().includes(search.toLowerCase()) ||
+    (s.title || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const startEditing = (s: StudySession, e: React.MouseEvent) => {
@@ -180,13 +180,13 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                   <div className="flex items-center gap-2 text-xs text-slate-400 mt-2">
                     <span>{formatRelativeTime(s.timestamp)}</span>
                     <span>·</span>
-                    <span className="capitalize">{s.selectedModels.join(', ')}</span>
-                    {s.followUps?.length > 0 && (
+                    <span className="capitalize">{(s.selectedModels || []).join(', ')}</span>
+                    {(s.followUps?.length ?? 0) > 0 && (
                       <>
                         <span>·</span>
                         <span className="flex items-center gap-1 text-indigo-600">
                           <MessageSquare className="w-3 h-3" />
-                          {s.followUps.length} follow-ups
+                          {s.followUps!.length} follow-ups
                         </span>
                       </>
                     )}

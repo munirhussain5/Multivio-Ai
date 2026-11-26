@@ -3,21 +3,61 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
-import { AIModelResponse, AIProvider, StudySession } from './types';
-import { queryGemini } from './services/ai/gemini';
-import { queryOpenAI } from './services/ai/openai';
-import { queryClaude } from './services/ai/claude';
-import { queryDeepSeek } from './services/ai/deepseek';
+import { AIModelResponse, AIProvider, StudySession, SynthesisResult } from './types';
+import { PROVIDER_REGISTRY, queryProvidersConcurrently } from './services/ai/providerRegistry';
 import { synthesizeAnswers } from './services/ai/synthesizer';
-import { generateLiveEducationalSession, generateLiveFollowUp } from './services/ai/geminiMultiGenerator';
-import { generateEducationalResponse, generateFollowUpAnswer } from './services/ai/mockGenerator';
+import { validateComputerScienceQuestion } from './services/ai/questionValidator';
+import {
+  generateCSFollowUp,
+  generateCSNotes,
+  generateCSQuiz,
+} from './services/ai/csToolsGenerator';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
+
+function buildPartialSynthesisFallback(
+  question: string,
+  responses: Record<AIProvider, AIModelResponse>
+): SynthesisResult {
+  const succeeded = Object.values(responses).filter(
+    (r) => r && r.status === 'success' && r.answer.trim().length > 0
+  );
+  const failed = Object.values(responses).filter((r) => r && r.status !== 'success');
+
+  const first = succeeded[0];
+  const combinedText = succeeded
+    .map((r) => `### ${r.modelName}\n${r.answer}`)
+    .join('\n\n---\n\n');
+
+  return {
+    simpleExplanation: first
+      ? `Showing direct verified response from ${first.modelName} for "${question}". Review the detailed breakdown below.`
+      : 'Partial AI results received.',
+    detailedExplanation: combinedText,
+    example: {
+      codeOrContext: '',
+      explanation: 'See the code and examples provided directly inside the AI model answer(s) above.',
+      language: 'markdown',
+    },
+    importantPoints: succeeded.map(
+      (r) => `${r.modelName} responded in ${(r.latencyMs / 1000).toFixed(2)}s.`
+    ),
+    commonMistakes: [],
+    quickSummary: `Received ${succeeded.length} live AI response(s)${
+      failed.length > 0 ? ` (${failed.length} provider(s) unavailable or failed)` : ''
+    }. Cross-model synthesis could not run automatically, so raw verified model answers are displayed.`,
+    practiceQuestions: [],
+    consensusSummary: `${succeeded.length} of ${Object.keys(responses).length} selected AI provider(s) succeeded.`,
+    agreements: [],
+    differencesOrNuances: failed.map(
+      (f) => `${f.modelName}: ${f.error || 'Unavailable'}`
+    ),
+  };
+}
 
 export async function startServer() {
   const app = express();
@@ -26,165 +66,136 @@ export async function startServer() {
 
   app.use(express.json({ limit: '10mb' }));
 
-  // Check providers status
+  // Provider configuration status (never leaks secret keys)
   app.get('/api/providers/status', (_req: Request, res: Response) => {
+    const chatgpt = PROVIDER_REGISTRY.chatgpt.isConfigured();
+    const gemini = PROVIDER_REGISTRY.gemini.isConfigured();
+    const claude = PROVIDER_REGISTRY.claude.isConfigured();
+    const deepseek = PROVIDER_REGISTRY.deepseek.isConfigured();
+
     res.json({
-      chatgpt: Boolean(process.env.OPENAI_API_KEY),
-      gemini: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
-      claude: Boolean(process.env.ANTHROPIC_API_KEY),
-      deepseek: Boolean(process.env.DEEPSEEK_API_KEY),
+      chatgpt,
+      gemini,
+      claude,
+      deepseek,
+      anyLiveProvider: chatgpt || gemini || claude || deepseek,
       supabase: Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
       supabaseProjectId: 'uxjlcvmgdnrvbwiczvgx',
-      isDemoModeSupported: true,
     });
   });
 
-  // Main study endpoint: queries models concurrently & synthesizes
-  app.post('/api/study', async (req: Request, res: Response) => {
+  // Standalone CS-only question validation endpoint
+  app.post('/api/validate-question', async (req: Request, res: Response) => {
     try {
-      const { question, models = ['chatgpt', 'gemini', 'claude', 'deepseek'], document } = req.body;
-      
-      const effectiveQuestion = (question && typeof question === 'string' && question.trim()) 
-        ? question.trim() 
-        : (document?.name ? `Explain, analyze, and summarize key concepts from lecture: ${document.name}` : '');
-
-      if (!effectiveQuestion) {
-        res.status(400).json({ error: 'A question or an attached document is required' });
+      const { question, parentQuestion, history, document } = req.body || {};
+      if (!question || typeof question !== 'string' || !question.trim()) {
+        res.status(400).json({ error: 'Please enter a Computer Science question.' });
         return;
       }
 
-      const selectedModels: AIProvider[] = Array.isArray(models) && models.length > 0 
-        ? models 
-        : ['chatgpt', 'gemini', 'claude', 'deepseek'];
+      const validation = await validateComputerScienceQuestion(question.trim(), {
+        parentQuestion,
+        history,
+        document,
+      });
+      res.json(validation);
+    } catch (err: any) {
+      console.error('API /api/validate-question error:', err);
+      res.status(500).json({ error: err.message || 'Validation error' });
+    }
+  });
 
-      // 1. Primary: Generate full, tailored live study session using Google Gemini API
-      try {
-        const liveSession = await generateLiveEducationalSession(
-          effectiveQuestion,
-          selectedModels,
-          document
-        );
-        if (liveSession) {
-          res.json(liveSession);
-          return;
-        }
-      } catch (liveErr) {
-        console.warn('Live multi-session generation notice:', liveErr);
+  // Main study endpoint: validates CS domain BEFORE querying providers concurrently & synthesizing
+  app.post('/api/study', async (req: Request, res: Response) => {
+    try {
+      const { question, models = ['chatgpt', 'gemini', 'claude', 'deepseek'], document } = req.body || {};
+
+      const effectiveQuestion =
+        question && typeof question === 'string' && question.trim()
+          ? question.trim()
+          : document?.name
+            ? `Explain, analyze, and summarize the Computer Science concepts in lecture: ${document.name}`
+            : '';
+
+      if (!effectiveQuestion) {
+        res.status(400).json({ error: 'Please enter a Computer Science question or attach a lecture document.' });
+        return;
       }
 
-      // Always prepare baseline educational responses with document integration
-      const baseline = generateEducationalResponse(effectiveQuestion, selectedModels, document);
+      // 1. Validate Computer Science relevance BEFORE calling any AI providers
+      const validation = await validateComputerScienceQuestion(effectiveQuestion, { document });
+      if (validation.decision !== 'ALLOWED') {
+        res.json({
+          rejected: true,
+          validation,
+        });
+        return;
+      }
 
-      const promptForLiveAI = document?.text 
-        ? `${effectiveQuestion}\n\n[Context from attached lecture document: "${document.name}"]:\n${document.text.slice(0, 8000)}` 
+      const validProviders: AIProvider[] = ['chatgpt', 'gemini', 'claude', 'deepseek'];
+      const selectedModels: AIProvider[] =
+        Array.isArray(models) && models.length > 0
+          ? models.filter((m): m is AIProvider => validProviders.includes(m))
+          : validProviders;
+
+      const modelsToQuery: AIProvider[] =
+        selectedModels.length > 0 ? selectedModels : validProviders;
+
+      const promptForLiveAI = document?.text
+        ? `${effectiveQuestion}\n\n[Context from attached lecture document: "${document.name}"]:\n${document.text.slice(0, 8000)}`
         : effectiveQuestion;
 
-      // Concurrently query available live APIs with 10s timeout
-      const modelPromises = selectedModels.map(async (provider): Promise<AIModelResponse> => {
-        const timeoutPromise = new Promise<AIModelResponse>((resolve) => {
-          setTimeout(() => {
-            // If live provider times out or isn't configured, use baseline
-            resolve(baseline.responses[provider]);
-          }, 10000);
+      // 2. Query every selected provider independently in parallel
+      const responses = await queryProvidersConcurrently(
+        modelsToQuery,
+        promptForLiveAI,
+        Boolean(document)
+      );
+
+      const successfulResponses = Object.values(responses).filter(
+        (r) => r && r.status === 'success' && r.answer.trim().length > 0
+      );
+
+      if (successfulResponses.length === 0) {
+        res.status(503).json({
+          error:
+            'No selected AI model could generate an answer. Ensure at least one provider API key (GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or DEEPSEEK_API_KEY) is configured and valid on the server.',
+          allProvidersFailed: true,
+          responses,
         });
-
-        const queryPromise = (async (): Promise<AIModelResponse> => {
-          try {
-            if (provider === 'gemini') {
-              const res = await queryGemini(promptForLiveAI);
-              if (res.answer) {
-                return {
-                  provider: 'gemini',
-                  modelName: res.modelName,
-                  answer: res.answer,
-                  latencyMs: res.latencyMs,
-                  status: 'success',
-                  perspectiveHighlight: document ? 'Contextual Grounding on Attached Lecture' : 'Intuitive Analogies & Contextual Grounding',
-                  keyApproach: 'Relates abstract logic to real-world mechanisms.',
-                };
-              }
-            } else if (provider === 'chatgpt') {
-              const res = await queryOpenAI(promptForLiveAI);
-              if (res.answer) {
-                return {
-                  provider: 'chatgpt',
-                  modelName: res.modelName,
-                  answer: res.answer,
-                  latencyMs: res.latencyMs,
-                  status: 'success',
-                  perspectiveHighlight: document ? 'Syllabus & Lecture Structural Breakdown' : 'Structured Hierarchy & Taxonomy',
-                  keyApproach: 'Direct definitions, clean classifications, and code steps.',
-                };
-              }
-            } else if (provider === 'claude') {
-              const res = await queryClaude(question);
-              if (res.answer) {
-                return {
-                  provider: 'claude',
-                  modelName: res.modelName,
-                  answer: res.answer,
-                  latencyMs: res.latencyMs,
-                  status: 'success',
-                  perspectiveHighlight: 'Pedagogical Rigor & Nuance',
-                  keyApproach: 'Theoretical context, common misconceptions, and contract rules.',
-                };
-              }
-            } else if (provider === 'deepseek') {
-              const res = await queryDeepSeek(question);
-              if (res.answer) {
-                return {
-                  provider: 'deepseek',
-                  modelName: res.modelName,
-                  answer: res.answer,
-                  latencyMs: res.latencyMs,
-                  status: 'success',
-                  perspectiveHighlight: 'Low-Level Systems & Complexity',
-                  keyApproach: 'CPU/memory layout, execution overhead, and performance tradeoffs.',
-                };
-              }
-            }
-          } catch (e: any) {
-            console.error(`Error querying provider ${provider}:`, e);
-          }
-          // Fall back gracefully to high-quality educational baseline
-          return baseline.responses[provider];
-        })();
-
-        return Promise.race([queryPromise, timeoutPromise]);
-      });
-
-      const responsesArray = await Promise.all(modelPromises);
-      const responses: Record<AIProvider, AIModelResponse> = {} as any;
-      responsesArray.forEach((r) => {
-        responses[r.provider] = r;
-      });
-
-      // Synthesize answers with 6s timeout race
-      const synthTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000));
-      let synthesis = await Promise.race([
-        synthesizeAnswers(effectiveQuestion, responses),
-        synthTimeout,
-      ]);
-      if (!synthesis) {
-        synthesis = baseline.synthesis;
+        return;
       }
+
+      // 3. Synthesize real responses + generate quiz & notes concurrently
+      const withOptionalTimeout = <T>(p: Promise<T | null>, ms = 15000): Promise<T | null> =>
+        Promise.race([
+          p.catch(() => null),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+        ]);
+
+      const [synthesized, generatedQuiz, generatedNotes] = await Promise.all([
+        synthesizeAnswers(effectiveQuestion, responses),
+        withOptionalTimeout(generateCSQuiz(effectiveQuestion, { count: 5 }), 25000),
+        withOptionalTimeout(generateCSNotes(effectiveQuestion), 25000),
+      ]);
+
+      const synthesis = synthesized || buildPartialSynthesisFallback(effectiveQuestion, responses);
 
       const session: StudySession = {
         id: `session-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        title: question.length > 50 ? question.slice(0, 47) + '...' : question,
-        question,
+        title:
+          effectiveQuestion.length > 55
+            ? effectiveQuestion.slice(0, 52) + '...'
+            : effectiveQuestion,
+        question: effectiveQuestion,
         timestamp: Date.now(),
-        selectedModels,
+        selectedModels: modelsToQuery,
         responses,
         synthesis,
         followUps: [],
-        quiz: {
-          id: `quiz-${Date.now()}`,
-          topic: question,
-          questions: baseline.quizQuestions,
-          completed: false,
-        },
-        notes: baseline.notes,
+        quiz: generatedQuiz || undefined,
+        notes: generatedNotes || undefined,
+        document: document || undefined,
       };
 
       res.json(session);
@@ -194,59 +205,127 @@ export async function startServer() {
     }
   });
 
-  // Follow-up chat endpoint
+  // Follow-up chat endpoint (validates CS scope on follow-ups too)
   app.post('/api/followup', async (req: Request, res: Response) => {
     try {
-      const { session, message, history = [] } = req.body;
-      if (!session || !message) {
-        res.status(400).json({ error: 'Session and message are required' });
+      const { session, message, history = [] } = req.body || {};
+      if (!session || !message || typeof message !== 'string' || !message.trim()) {
+        res.status(400).json({ error: 'Session and a non-empty follow-up question are required.' });
         return;
       }
 
-      let reply: string | null = null;
-      try {
-        reply = await generateLiveFollowUp(session, message, history);
-      } catch (liveErr) {
-        console.warn('Live follow-up generation failed, falling back:', liveErr);
+      const trimmedMessage = message.trim();
+
+      // Validate Computer Science scope for follow-up questions
+      const validation = await validateComputerScienceQuestion(trimmedMessage, {
+        parentQuestion: session.question,
+        history,
+      });
+
+      if (validation.decision !== 'ALLOWED') {
+        res.json({
+          rejected: true,
+          validation,
+          reply: validation.message,
+          timestamp: Date.now(),
+        });
+        return;
       }
 
+      const reply = await generateCSFollowUp(session, trimmedMessage, history);
       if (!reply) {
-        reply = generateFollowUpAnswer(session, message, history);
+        res.status(503).json({
+          error:
+            'Unable to generate a follow-up response. Ensure a backend AI provider key is configured and reachable.',
+        });
+        return;
       }
 
       res.json({
+        rejected: false,
         reply,
         timestamp: Date.now(),
       });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('API /api/followup error:', err);
+      res.status(500).json({ error: err.message || 'Follow-up request failed.' });
     }
   });
 
-  // Quiz generator endpoint
-  app.post('/api/quiz/generate', (req: Request, res: Response) => {
+  // Custom CS Quiz generator endpoint
+  app.post('/api/quiz/generate', async (req: Request, res: Response) => {
     try {
-      const { question } = req.body;
-      const baseline = generateEducationalResponse(question || 'Object-Oriented Programming', ['gemini']);
-      res.json({
-        id: `quiz-${Date.now()}`,
-        topic: question || 'Concept Quiz',
-        questions: baseline.quizQuestions,
-        completed: false,
+      const { topic, question, count = 5, questionTypes, contextSummary } = req.body || {};
+      const targetTopic = (topic || question || '').trim();
+
+      if (!targetTopic) {
+        res.status(400).json({ error: 'Please enter a Computer Science quiz topic.' });
+        return;
+      }
+
+      const validation = await validateComputerScienceQuestion(targetTopic);
+      if (validation.decision !== 'ALLOWED') {
+        res.json({
+          rejected: true,
+          validation,
+        });
+        return;
+      }
+
+      const quiz = await generateCSQuiz(targetTopic, {
+        count: Number(count) || 5,
+        questionTypes,
+        contextSummary,
       });
+
+      if (!quiz) {
+        res.status(503).json({
+          error:
+            'Could not generate quiz questions. Please verify your backend AI API key configuration.',
+        });
+        return;
+      }
+
+      res.json(quiz);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('API /api/quiz/generate error:', err);
+      res.status(500).json({ error: err.message || 'Quiz generation failed.' });
     }
   });
 
-  // Notes generator endpoint
-  app.post('/api/notes/generate', (req: Request, res: Response) => {
+  // CS Study Notes generator endpoint
+  app.post('/api/notes/generate', async (req: Request, res: Response) => {
     try {
-      const { question } = req.body;
-      const baseline = generateEducationalResponse(question || 'Object-Oriented Programming', ['gemini']);
-      res.json(baseline.notes);
+      const { topic, question, synthesis } = req.body || {};
+      const targetTopic = (topic || question || '').trim();
+
+      if (!targetTopic) {
+        res.status(400).json({ error: 'Please enter a Computer Science topic for study notes.' });
+        return;
+      }
+
+      const validation = await validateComputerScienceQuestion(targetTopic);
+      if (validation.decision !== 'ALLOWED') {
+        res.json({
+          rejected: true,
+          validation,
+        });
+        return;
+      }
+
+      const notes = await generateCSNotes(targetTopic, synthesis);
+      if (!notes) {
+        res.status(503).json({
+          error:
+            'Could not generate study notes. Please verify your backend AI API key configuration.',
+        });
+        return;
+      }
+
+      res.json(notes);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('API /api/notes/generate error:', err);
+      res.status(500).json({ error: err.message || 'Notes generation failed.' });
     }
   });
 
@@ -265,6 +344,6 @@ export async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Multivio server running on port ${PORT}`);
+    console.log(`Multivio / StudyMind CS server running on port ${PORT}`);
   });
 }

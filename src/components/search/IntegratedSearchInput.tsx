@@ -70,92 +70,76 @@ Queue-based exploration. Explores neighbor vertices level by level. Optimal for 
 Stack / recursive exploration. Used for cycle detection, topological sorting (DAGs), connected components. Time: O(V + E).`,
   },
   {
-    id: 'preset_bio202',
-    name: 'BIO202_Lecture04_Cellular_Respiration.pdf',
+    id: 'preset_db204',
+    name: 'CS204_Lecture05_Database_Normalization_SQL.pdf',
     size: 1820000,
     type: 'application/pdf',
     wordCount: 2890,
     pageCount: 16,
     uploadedAt: Date.now(),
-    text: `--- Lecture Document: BIO202 Cellular Respiration & ATP Synthesis (16 Pages) ---
+    text: `--- Lecture Document: CS204 Relational Database Design & SQL Joins (16 Pages) ---
 
 --- Page 1 ---
-BIO202: Cell Biology & Bioenergetics
-Topic: Cellular Respiration, Glycolysis, Krebs Cycle, Oxidative Phosphorylation
+CS204: Database Management Systems
+Topic: Normalization (1NF, 2NF, 3NF, BCNF), Primary & Foreign Keys, SQL Joins
 
 --- Page 2 ---
-Summary Equation:
-C6H12O6 + 6 O2 -> 6 CO2 + 6 H2O + ~30-32 ATP
-Four Main Stages:
-1. Glycolysis (Cytoplasm - Anaerobic)
-2. Pyruvate Oxidation (Mitochondrial Matrix)
-3. Citric Acid / Krebs Cycle (Mitochondrial Matrix)
-4. Oxidative Phosphorylation & Electron Transport Chain (Inner Mitochondrial Membrane)
+Normal Forms Summary:
+1. First Normal Form (1NF): Atomic column values, no repeating groups.
+2. Second Normal Form (2NF): In 1NF + no partial functional dependencies on a composite primary key.
+3. Third Normal Form (3NF): In 2NF + no transitive dependencies (non-key attributes depend only on the key).
 
 --- Page 3 ---
-Stage 1: Glycolysis
-- Glucose (6-carbon) split into 2 Pyruvate (3-carbon).
-- Net yield: 2 ATP (via substrate-level phosphorylation) + 2 NADH.
-- Does not require oxygen directly.
-
---- Page 4 ---
-Stage 4: Chemiosmosis & ATP Synthase
-- Protons (H+) pumped across inner membrane to intermembrane space.
-- Creates electrochemical proton gradient (proton-motive force).
-- ATP Synthase acts as rotary molecular motor converting gradient energy into ATP.`,
+SQL Join Types:
+- INNER JOIN: Matching rows in both tables.
+- LEFT JOIN: All left rows + matched right rows.
+- Indexing (B+ Trees): Accelerates SELECT queries while adding write overhead on INSERT/UPDATE.`,
   },
   {
-    id: 'preset_phys150',
-    name: 'PHYS150_Lecture12_Electromagnetism.pptx',
+    id: 'preset_os301',
+    name: 'CS301_Lecture10_OS_Processes_Deadlocks.pptx',
     size: 3100000,
     type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     wordCount: 2650,
     slideCount: 18,
     uploadedAt: Date.now(),
-    text: `--- PowerPoint Presentation: PHYS150_Lecture12_Electromagnetism.pptx (18 Slides) ---
+    text: `--- PowerPoint Presentation: CS301 Operating Systems - Processes, Threads & Deadlocks (18 Slides) ---
 
-### Slide 1: PHYS150 Physics II - Electromagnetism & Maxwell's Equations
-Department of Physics - Week 6
+### Slide 1: CS301 Operating Systems
+Department of Computer Science - Week 10
 
-### Slide 2: Electric Fields & Gauss's Law
-Integral(E · dA) = Q_enclosed / epsilon_0
-Electric flux through any closed Gaussian surface is proportional to enclosed charge.
-Applications: spherical shells, infinite line charges, planar charge sheets.
+### Slide 2: Process vs Thread
+Process: Independent address space, PCB, heavier context switch.
+Thread: Shares heap & code with sibling threads in the same process, lightweight stack & registers.
 
-### Slide 3: Magnetic Fields & Ampère-Maxwell Law
-Integral(B · dl) = mu_0 * I_enclosed + mu_0 * epsilon_0 * (dPhi_E / dt)
-Displacement current term explains electromagnetic wave propagation in vacuum!
+### Slide 3: Coffman's Four Deadlock Conditions
+1. Mutual Exclusion
+2. Hold and Wait
+3. No Preemption
+4. Circular Wait
 
-### Slide 4: Faraday's Law of Induction
-EMF = - dPhi_B / dt
-Lenz's Law: Induced current opposes change in magnetic flux.
-Generators, transformers, and induction motors.`,
+### Slide 4: CPU Scheduling Algorithms
+FCFS, Shortest Job First (SJF), Round Robin (time quantum), Priority Scheduling.`,
   },
   {
-    id: 'preset_math220',
-    name: 'MATH220_Lecture07_Eigenvalues_And_SVD.docx',
+    id: 'preset_cs320',
+    name: 'CS320_Lecture07_Eigenvalues_For_ML.docx',
     size: 980000,
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     wordCount: 2150,
     pageCount: 10,
     uploadedAt: Date.now(),
-    text: `MATH 220: Linear Algebra - Lecture 7: Eigenvalues, Eigenvectors & Matrix Diagonalization
+    text: `CS 320: Mathematics for Computing & Machine Learning - Eigenvalues & Dimensionality Reduction
 
 1. Core Definition
-Let A be an n x n matrix. A scalar lambda is an eigenvalue and v != 0 is an eigenvector if:
+Let A be an n x n covariance matrix. Scalar lambda is an eigenvalue and v != 0 is an eigenvector if:
 A * v = lambda * v
-Rearranging: (A - lambda * I) * v = 0
-Non-trivial solutions exist if and only if det(A - lambda * I) = 0 (the characteristic polynomial).
+Non-trivial solutions exist when det(A - lambda * I) = 0.
 
-2. Geometric Intuition
-Multiplying matrix A by eigenvector v merely scales the vector by factor lambda without rotating its directional span.
-
-3. Diagonalization Theorem
-An n x n matrix A is diagonalizable if and only if it has n linearly independent eigenvectors.
-A = P * D * P^(-1), where D is the diagonal matrix of eigenvalues and P contains eigenvectors as columns.
-
-4. Applications to Machine Learning & Physics
-Principal Component Analysis (PCA), PageRank algorithm, vibration modes in mechanical engineering, quantum state observables.`,
+2. Applications in Computer Science
+- Principal Component Analysis (PCA) for feature reduction in Machine Learning
+- PageRank eigenvector computation in Search Engines
+- Spectral Graph Partitioning & Computer Graphics transformations.`,
   },
 ];
 
@@ -223,12 +207,12 @@ export const IntegratedSearchInput: React.FC<IntegratedSearchInputProps> = ({
     if (!question.trim()) {
       if (preset.id === 'preset_cs101') {
         setQuestion('Explain binary search trees vs graphs and traversal complexities from lecture slides');
-      } else if (preset.id === 'preset_bio202') {
-        setQuestion('Compare glycolysis and oxidative phosphorylation ATP yields from the lecture notes');
-      } else if (preset.id === 'preset_phys150') {
-        setQuestion('How does Gauss law and Faraday law relate in Maxwell equations from this slide deck?');
+      } else if (preset.id === 'preset_db204') {
+        setQuestion('Explain 1NF, 2NF, 3NF database normalization and SQL joins from the lecture notes');
+      } else if (preset.id === 'preset_os301') {
+        setQuestion('Compare processes vs threads and explain Coffman deadlock conditions from this slide deck');
       } else {
-        setQuestion('Explain the geometric meaning of eigenvalues and diagonalization from lecture notes');
+        setQuestion('Explain how eigenvalues and eigenvectors are used in PCA and PageRank for Machine Learning');
       }
     }
   };

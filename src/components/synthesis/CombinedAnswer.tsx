@@ -330,7 +330,7 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
                   >
                     All 4 Models
                   </button>
-                  {selectedModels.map(m => (
+                  {(selectedModels || []).map(m => (
                     <button
                       key={m}
                       type="button"
@@ -349,7 +349,7 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
 
               {/* Models Grid or Single View */}
               <div className="space-y-3">
-                {selectedModels
+                {(selectedModels || [])
                   .filter(m => activeModelPill === 'all' || activeModelPill === m)
                   .map(m => {
                     const res = responses[m];
@@ -371,11 +371,11 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
                               </span>
                             )}
                           </div>
-                          {res.latencyMs && (
+                          {res.latencyMs ? (
                             <span className="text-[11px] font-mono text-slate-400">
                               {res.latencyMs}ms response
                             </span>
-                          )}
+                          ) : null}
                         </div>
 
                         {res.keyApproach && (
@@ -386,7 +386,13 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
                         )}
 
                         <div className="text-xs sm:text-sm text-slate-800 leading-relaxed pt-1 max-h-96 overflow-y-auto">
-                          <MarkdownRenderer content={res.answer} />
+                          {res.status === 'success' && res.answer ? (
+                            <MarkdownRenderer content={res.answer} />
+                          ) : (
+                            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-2.5">
+                              {res.error || 'Provider unavailable for this request.'}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
@@ -396,16 +402,25 @@ export const CombinedAnswer: React.FC<CombinedAnswerProps> = ({
           )}
 
           {/* Master Unified Synthesis Markdown */}
-          <div className="text-slate-800 text-sm leading-relaxed space-y-3 bg-white p-4.5 rounded-xl border border-slate-200">
+          <div className="text-slate-800 text-sm leading-relaxed space-y-4 bg-white p-4.5 rounded-xl border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
                 Authoritative Master Synthesis:
               </span>
               <span className="text-[11px] text-slate-400 font-medium">
-                Unified across all models
+                Unified across available CS models
               </span>
             </div>
             <MarkdownRenderer content={synthesis.detailedExplanation} />
+
+            {synthesis.howItWorks && (
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-700 mb-2">
+                  How It Works (Step-by-Step)
+                </h4>
+                <MarkdownRenderer content={synthesis.howItWorks} />
+              </div>
+            )}
           </div>
         </section>
 

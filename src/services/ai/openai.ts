@@ -1,58 +1,112 @@
+import { AIModelResponse } from '../../types';
 import { COMMON_EDUCATIONAL_SYSTEM_PROMPT } from './providersConfig';
 
-export async function queryOpenAI(question: string, apiKey?: string): Promise<{
-  answer: string;
-  latencyMs: number;
-  modelName: string;
-  source: 'live_api' | 'educational_engine';
-}> {
+export function isOpenAIConfigured(): boolean {
+  const key = process.env.OPENAI_API_KEY;
+  return Boolean(key && key.trim());
+}
+
+export async function queryOpenAI(
+  question: string,
+  hasDocument = false
+): Promise<AIModelResponse> {
   const startTime = Date.now();
-  const effectiveKey = apiKey || process.env.OPENAI_API_KEY;
+  const effectiveKey = process.env.OPENAI_API_KEY;
 
-  if (effectiveKey) {
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${effectiveKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: COMMON_EDUCATIONAL_SYSTEM_PROMPT },
-            {
-              role: 'user',
-              content: `Student Question: ${question}
+  const baseMeta = {
+    provider: 'chatgpt' as const,
+    perspectiveHighlight: hasDocument
+      ? 'Syllabus & Lecture Structural Breakdown'
+      : 'Structured Hierarchy & CS Taxonomy',
+    keyApproach: 'Clear definitions, structured headings, and step-by-step code walkthroughs.',
+  };
 
-Provide an educational explanation structured with clear headings, core definitions, standard taxonomies/hierarchies, and a clean code or problem-solving walkthrough.`,
-            },
-          ],
-          temperature: 0.7,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content || '';
-        return {
-          answer: content,
-          latencyMs: Date.now() - startTime,
-          modelName: 'GPT-4o (OpenAI API)',
-          source: 'live_api',
-        };
-      }
-    } catch (err: any) {
-      console.warn('OpenAI live API call failed, falling back to educational engine:', err.message);
-    }
+  if (!effectiveKey || !effectiveKey.trim()) {
+    return {
+      ...baseMeta,
+      modelName: 'GPT-4o',
+      answer: '',
+      latencyMs: Date.now() - startTime,
+      status: 'unavailable',
+      error: 'OPENAI_API_KEY is not configured on the server.',
+    };
   }
 
-  // Graceful simulation
-  await new Promise(r => setTimeout(r, 750));
-  return {
-    answer: '',
-    latencyMs: Date.now() - startTime,
-    modelName: 'GPT-4o',
-    source: 'educational_engine',
-  };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 22000);
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${effectiveKey.trim()}`,
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: COMMON_EDUCATIONAL_SYSTEM_PROMPT },
+          {
+            role: 'user',
+            content: `Computer Science Student Question:
+${question}
+
+Provide a structured educational explanation in basic English with clear headings, technical term definitions, practical use cases, and step-by-step code or problem-solving examples where applicable.`,
+          },
+        ],
+        temperature: 0.5,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      let errDetail = `OpenAI API returned HTTP ${response.status}`;
+      try {
+        const errJson = await response.json();
+        if (errJson?.error?.message) errDetail = errJson.error.message;
+      } catch {
+        // keep HTTP status error
+      }
+      return {
+        ...baseMeta,
+        modelName: 'GPT-4o',
+        answer: '',
+        latencyMs: Date.now() - startTime,
+        status: 'error',
+        error: errDetail,
+      };
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim() || '';
+    if (!content) {
+      return {
+        ...baseMeta,
+        modelName: data.model || 'GPT-4o',
+        answer: '',
+        latencyMs: Date.now() - startTime,
+        status: 'error',
+        error: 'OpenAI returned an empty response.',
+      };
+    }
+
+    return {
+      ...baseMeta,
+      modelName: data.model || 'GPT-4o',
+      answer: content,
+      latencyMs: Date.now() - startTime,
+      status: 'success',
+    };
+  } catch (err: any) {
+    return {
+      ...baseMeta,
+      modelName: 'GPT-4o',
+      answer: '',
+      latencyMs: Date.now() - startTime,
+      status: 'error',
+      error: err?.name === 'AbortError' ? 'OpenAI request timed out.' : (err?.message || 'OpenAI request failed.'),
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
 }

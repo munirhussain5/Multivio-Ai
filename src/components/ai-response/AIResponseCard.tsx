@@ -128,9 +128,11 @@ export const AIResponseCard: React.FC<AIResponseCardProps> = ({
           {isSuccess ? (
             <MarkdownRenderer content={response.answer} />
           ) : (
-            <div className="p-3 bg-amber-50 rounded-lg text-amber-800 text-xs flex items-center gap-2">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
-              <span>{response.error || 'Provider temporarily unavailable. Showing synthesized educational knowledge.'}</span>
+              <span>
+                {response.error || 'This AI provider is unavailable for this request.'}
+              </span>
             </div>
           )}
         </div>

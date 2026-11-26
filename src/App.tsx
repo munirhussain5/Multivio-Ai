@@ -4,7 +4,9 @@ import {
   AIProvider, 
   FollowUpMessage, 
   ProviderStatus, 
+  QuestionValidationResult,
   QuizData, 
+  QuizType,
   StudyNote, 
   StudySession,
   UploadedDocument
@@ -32,7 +34,6 @@ import {
   storeUser,
   signOutUser
 } from './services/supabase/supabaseClient';
-import { generateEducationalResponse, generateFollowUpAnswer } from './services/ai/mockGenerator';
 import { MultivioLogo } from './components/ui/MultivioLogo';
 import { 
   Search, 
@@ -51,10 +52,78 @@ import {
   Zap,
   Mail,
   Paperclip,
-  FileText
+  FileText,
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react';
 
 const STORAGE_KEY = 'multivio_sessions_v1';
+const DEFAULT_MODELS: AIProvider[] = ['chatgpt', 'gemini', 'claude', 'deepseek'];
+
+function normalizeSession(raw: any): StudySession | null {
+  if (!raw || typeof raw !== 'object' || typeof raw.question !== 'string') {
+    return null;
+  }
+  const responses =
+    raw.responses && typeof raw.responses === 'object' ? raw.responses : {};
+  const responseKeys = Object.keys(responses).filter((k): k is AIProvider =>
+    DEFAULT_MODELS.includes(k as AIProvider)
+  );
+  const selectedModels: AIProvider[] =
+    Array.isArray(raw.selectedModels) && raw.selectedModels.length > 0
+      ? raw.selectedModels
+      : responseKeys.length > 0
+        ? responseKeys
+        : DEFAULT_MODELS;
+
+  const synthesis =
+    raw.synthesis && typeof raw.synthesis === 'object'
+      ? {
+          simpleExplanation: raw.synthesis.simpleExplanation || '',
+          detailedExplanation: raw.synthesis.detailedExplanation || '',
+          howItWorks: raw.synthesis.howItWorks,
+          example: raw.synthesis.example || { codeOrContext: '', explanation: '' },
+          importantPoints: Array.isArray(raw.synthesis.importantPoints)
+            ? raw.synthesis.importantPoints
+            : [],
+          commonMistakes: Array.isArray(raw.synthesis.commonMistakes)
+            ? raw.synthesis.commonMistakes
+            : [],
+          quickSummary: raw.synthesis.quickSummary || '',
+          practiceQuestions: Array.isArray(raw.synthesis.practiceQuestions)
+            ? raw.synthesis.practiceQuestions
+            : [],
+          consensusSummary: raw.synthesis.consensusSummary || '',
+          agreements: Array.isArray(raw.synthesis.agreements) ? raw.synthesis.agreements : [],
+          differencesOrNuances: Array.isArray(raw.synthesis.differencesOrNuances)
+            ? raw.synthesis.differencesOrNuances
+            : [],
+        }
+      : {
+          simpleExplanation: '',
+          detailedExplanation: '',
+          example: { codeOrContext: '', explanation: '' },
+          importantPoints: [],
+          commonMistakes: [],
+          quickSummary: '',
+          practiceQuestions: [],
+          consensusSummary: '',
+          agreements: [],
+          differencesOrNuances: [],
+        };
+
+  return {
+    ...raw,
+    id: raw.id || `session-${Date.now()}`,
+    title: raw.title || raw.question,
+    question: raw.question,
+    timestamp: typeof raw.timestamp === 'number' ? raw.timestamp : Date.now(),
+    selectedModels,
+    responses,
+    synthesis,
+    followUps: Array.isArray(raw.followUps) ? raw.followUps : [],
+  };
+}
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('study');
@@ -75,6 +144,16 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'combined' | 'models' | 'both'>('both');
   const [providerStatus, setProviderStatus] = useState<ProviderStatus | undefined>(undefined);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [validationAlert, setValidationAlert] = useState<{
+    result: QuestionValidationResult;
+    originalQuestion: string;
+  } | null>(null);
+  const [clarificationText, setClarificationText] = useState('');
+  const [providerErrorAlert, setProviderErrorAlert] = useState<{
+    error: string;
+    responses?: Record<AIProvider, AIModelResponse>;
+  } | null>(null);
+  const [standaloneQuiz, setStandaloneQuiz] = useState<QuizData | null>(null);
 
   // User Authentication State
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => getStoredUser());
@@ -108,8 +187,13 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setSessions(parsed);
-          setCurrentSession(parsed[0]);
+          const normalized = parsed
+            .map(normalizeSession)
+            .filter((s): s is StudySession => s !== null);
+          if (normalized.length > 0) {
+            setSessions(normalized);
+            setCurrentSession(normalized[0]);
+          }
         }
       }
     } catch (e) {
@@ -137,11 +221,16 @@ export default function App() {
         setProviderStatus(prev => ({ ...(prev || { chatgpt: false, gemini: true, claude: false, deepseek: false }), supabase: true }));
         loadSessionsFromSupabase().then(cloudSessions => {
           if (cloudSessions && cloudSessions.length > 0) {
-            setSessions(prev => {
-              const existingIds = new Set(prev.map(s => s.id));
-              const merged = [...prev, ...cloudSessions.filter(s => !existingIds.has(s.id))];
-              return merged;
-            });
+            const normalizedCloud = cloudSessions
+              .map(normalizeSession)
+              .filter((s): s is StudySession => s !== null);
+            if (normalizedCloud.length > 0) {
+              setSessions(prev => {
+                const existingIds = new Set(prev.map(s => s.id));
+                const merged = [...prev, ...normalizedCloud.filter(s => !existingIds.has(s.id))];
+                return merged;
+              });
+            }
           }
         });
       }
@@ -173,16 +262,25 @@ export default function App() {
   const handleAskMultivio = async (overrideQuestion?: string) => {
     let q = (overrideQuestion || question).trim();
     if (!q && attachedDocument) {
-      q = `Analyze and explain key lecture concepts from: ${attachedDocument.name}`;
+      q = `Analyze and explain key Computer Science lecture concepts from: ${attachedDocument.name}`;
     }
-    if (!q || isLoading) return;
+    if (!q) {
+      showToast('Please enter a Computer Science question first.');
+      return;
+    }
+    if (isLoading) return;
 
+    setValidationAlert(null);
+    setProviderErrorAlert(null);
     setIsLoading(true);
     setCurrentTab('study');
-    setLoadingStep(attachedDocument ? `Analyzing lecture document "${attachedDocument.name}" across AI models...` : 'Dispatching question to selected AI models...');
+    setLoadingStep(
+      attachedDocument
+        ? `Validating & analyzing lecture document "${attachedDocument.name}" across selected AI models...`
+        : 'Validating Computer Science topic & querying selected AI models...'
+    );
 
     try {
-      // First attempt backend endpoint
       const response = await fetch('/api/study', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -193,54 +291,117 @@ export default function App() {
         }),
       });
 
-      if (response.ok) {
-        const session: StudySession = await response.json();
-        if (attachedDocument && !session.document) {
-          session.document = attachedDocument;
-        }
-        setCurrentSession(session);
-        const updated = [session, ...sessions.filter(s => s.id !== session.id)];
-        saveSessionsToStorage(updated);
-        showToast('Lesson generated and ready!');
-      } else {
-        throw new Error('Backend returned non-200');
-      }
-    } catch (err) {
-      console.info('Using client-side educational engine fallback:', err);
-      // Client-side fallback guarantees instantaneous responsiveness
-      const baseline = generateEducationalResponse(q, selectedModels, attachedDocument || undefined);
-      const session: StudySession = {
-        id: `session-${Date.now()}`,
-        title: q.length > 50 ? q.slice(0, 47) + '...' : q,
-        question: q,
-        timestamp: Date.now(),
-        selectedModels,
-        responses: baseline.responses,
-        synthesis: baseline.synthesis,
-        followUps: [],
-        quiz: {
-          id: `quiz-${Date.now()}`,
-          topic: q,
-          questions: baseline.quizQuestions,
-          completed: false,
-        },
-        notes: baseline.notes,
-        document: attachedDocument || undefined,
-      };
+      const data = await response.json().catch(() => ({}));
 
+      if (data?.rejected && data?.validation) {
+        setValidationAlert({
+          result: data.validation,
+          originalQuestion: q,
+        });
+        setClarificationText('');
+        showToast(
+          data.validation.decision === 'NEEDS_CLARIFICATION'
+            ? 'Please clarify how your question relates to Computer Science.'
+            : 'StudyMind only answers Computer Science & computing questions.'
+        );
+        return;
+      }
+
+      if (!response.ok || data?.allProvidersFailed) {
+        setProviderErrorAlert({
+          error:
+            data?.error ||
+            'Unable to retrieve responses from the selected AI providers. Please check your server API keys.',
+          responses: data?.responses,
+        });
+        showToast('AI provider error: check details on screen.');
+        return;
+      }
+
+      const session = normalizeSession(data) || (data as StudySession);
+      if (attachedDocument && !session.document) {
+        session.document = attachedDocument;
+      }
       setCurrentSession(session);
       const updated = [session, ...sessions.filter(s => s.id !== session.id)];
       saveSessionsToStorage(updated);
-      showToast('Lesson generated and ready!');
+      showToast('Computer Science lesson ready!');
+    } catch (err: any) {
+      console.error('Error querying /api/study:', err);
+      setProviderErrorAlert({
+        error:
+          err?.message ||
+          'Could not connect to the StudyMind backend server. Please verify the server is running.',
+      });
+      showToast('Backend connection error');
     } finally {
       setIsLoading(false);
       setLoadingStep('');
     }
   };
 
-  // Follow-up question handler
+  const handleSubmitClarification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validationAlert || !clarificationText.trim() || isLoading) return;
+    const clarifiedQuery = `${validationAlert.originalQuestion} (Computer Science context: ${clarificationText.trim()})`;
+    setQuestion(clarifiedQuery);
+    setClarificationText('');
+    await handleAskMultivio(clarifiedQuery);
+  };
+
+  // Custom CS quiz generator handler
+  const handleGenerateCustomQuiz = async (
+    topic: string,
+    count: number,
+    questionTypes: QuizType[]
+  ): Promise<{ error?: string; rejectedMessage?: string }> => {
+    try {
+      const response = await fetch('/api/quiz/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          count,
+          questionTypes,
+          contextSummary: currentSession?.synthesis?.detailedExplanation,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (data?.rejected && data?.validation) {
+        return { rejectedMessage: data.validation.message };
+      }
+
+      if (!response.ok || !data?.questions) {
+        return {
+          error: data?.error || 'Could not generate quiz questions. Check backend API configuration.',
+        };
+      }
+
+      const generatedQuiz: QuizData = data;
+      if (currentSession) {
+        const updatedSession: StudySession = {
+          ...currentSession,
+          quiz: generatedQuiz,
+        };
+        setCurrentSession(updatedSession);
+        saveSessionsToStorage(
+          sessions.map(s => (s.id === updatedSession.id ? updatedSession : s))
+        );
+      } else {
+        setStandaloneQuiz(generatedQuiz);
+      }
+
+      showToast(`Generated ${generatedQuiz.questions.length} CS quiz questions!`);
+      return {};
+    } catch (err: any) {
+      return { error: err?.message || 'Failed to connect to quiz generation endpoint.' };
+    }
+  };
+
+  // Follow-up question handler (CS-validated on backend)
   const handleSendFollowUp = async (userMessage: string) => {
-    if (!currentSession || isFollowUpLoading) return;
+    if (!currentSession || isFollowUpLoading || !userMessage.trim()) return;
 
     const studentMsg: FollowUpMessage = {
       id: `msg-${Date.now()}`,
@@ -251,7 +412,7 @@ export default function App() {
 
     const sessionWithUserMsg: StudySession = {
       ...currentSession,
-      followUps: [...currentSession.followUps, studentMsg],
+      followUps: [...(currentSession.followUps || []), studentMsg],
     };
     setCurrentSession(sessionWithUserMsg);
     setIsFollowUpLoading(true);
@@ -267,12 +428,22 @@ export default function App() {
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       let replyText = '';
-      if (response.ok) {
-        const data = await response.json();
+      if (data?.rejected && data?.validation) {
+        replyText = data.validation.message;
+        showToast(
+          data.validation.decision === 'NEEDS_CLARIFICATION'
+            ? 'Please clarify how your follow-up relates to Computer Science.'
+            : 'Follow-up restricted to Computer Science topics.'
+        );
+      } else if (response.ok && data?.reply) {
         replyText = data.reply;
       } else {
-        replyText = generateFollowUpAnswer(sessionWithUserMsg, userMessage, sessionWithUserMsg.followUps);
+        replyText = `⚠️ **Unable to complete follow-up:** ${
+          data?.error || 'The backend AI provider did not return a response.'
+        }`;
       }
 
       const botMsg: FollowUpMessage = {
@@ -290,12 +461,11 @@ export default function App() {
       setCurrentSession(finalSession);
       const updatedSessions = sessions.map(s => s.id === finalSession.id ? finalSession : s);
       saveSessionsToStorage(updatedSessions);
-    } catch (err) {
-      const replyText = generateFollowUpAnswer(sessionWithUserMsg, userMessage, sessionWithUserMsg.followUps);
+    } catch (err: any) {
       const botMsg: FollowUpMessage = {
         id: `msg-bot-${Date.now()}`,
         sender: 'multivio',
-        text: replyText,
+        text: `⚠️ **Connection Error:** ${err?.message || 'Unable to reach follow-up endpoint.'}`,
         timestamp: Date.now(),
       };
       const finalSession: StudySession = {
@@ -344,9 +514,14 @@ export default function App() {
 
   // Open specific session
   const handleOpenSession = (s: StudySession) => {
-    setCurrentSession(s);
-    setQuestion(s.question);
-    setSelectedModels(s.selectedModels);
+    const safe = normalizeSession(s) || s;
+    setCurrentSession(safe);
+    setQuestion(safe.question || '');
+    setSelectedModels(
+      Array.isArray(safe.selectedModels) && safe.selectedModels.length > 0
+        ? safe.selectedModels
+        : DEFAULT_MODELS
+    );
     setCurrentTab('study');
   };
 
@@ -441,29 +616,31 @@ export default function App() {
 
         {/* TAB: QUIZ */}
         {currentTab === 'quiz' && (
-          currentSession?.quiz ? (
+          (currentSession?.quiz || standaloneQuiz) ? (
             <QuizView
-              quiz={currentSession.quiz}
-              onUpdateQuiz={handleUpdateQuiz}
-              onBackToLesson={() => setCurrentTab('study')}
+              quiz={(currentSession?.quiz || standaloneQuiz)!}
+              onUpdateQuiz={(updatedQuiz) => {
+                if (currentSession) {
+                  handleUpdateQuiz(updatedQuiz);
+                } else {
+                  setStandaloneQuiz(updatedQuiz);
+                }
+              }}
+              onGenerateCustomQuiz={handleGenerateCustomQuiz}
+              onBackToLesson={currentSession ? () => setCurrentTab('study') : undefined}
             />
           ) : (
-            <div className="max-w-xl mx-auto text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
-              <FileQuestion className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-slate-800">No active quiz yet</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                Ask any educational question first, and Multivio will formulate an interactive quiz tailored to your lesson!
-              </p>
-              <button
-                onClick={() => {
-                  setQuestion('Explain polymorphism in OOP');
-                  handleAskMultivio('Explain polymorphism in OOP');
-                }}
-                className="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer"
-              >
-                Try Sample Quiz on Polymorphism
-              </button>
-            </div>
+            <QuizView
+              quiz={{
+                id: 'quiz-empty',
+                topic: 'Computer Science Practice Quiz',
+                questions: [],
+                completed: false,
+              }}
+              onUpdateQuiz={() => {}}
+              onGenerateCustomQuiz={handleGenerateCustomQuiz}
+              onBackToLesson={() => setCurrentTab('study')}
+            />
           )
         )}
 
@@ -511,11 +688,14 @@ export default function App() {
             {/* HERO SECTION (Search & AI Selector) */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-8 shadow-xs">
               <div className="text-center max-w-3xl mx-auto mb-6">
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full mb-2.5">
+                  Your AI Learning Assistant for Computer Science
+                </span>
                 <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
                   Learn Smarter With Multiple AI Models
                 </h1>
                 <p className="text-sm sm:text-base text-slate-600 mt-2 font-medium">
-                  Ask one question. Compare multiple AI perspectives. Get one clear explanation designed for learning.
+                  Learn programming, databases, algorithms, networking, artificial intelligence, and more with multiple AI models in one place.
                 </p>
               </div>
 
@@ -570,6 +750,102 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            {/* COMPUTER SCIENCE VALIDATION REJECTION / CLARIFICATION ALERT */}
+            {validationAlert && (
+              <div
+                className={`rounded-2xl border p-5 sm:p-6 shadow-xs ${
+                  validationAlert.result.decision === 'NEEDS_CLARIFICATION'
+                    ? 'bg-amber-50 border-amber-300 text-amber-950'
+                    : 'bg-rose-50 border-rose-300 text-rose-950'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      validationAlert.result.decision === 'NEEDS_CLARIFICATION'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-rose-100 text-rose-700'
+                    }`}
+                  >
+                    {validationAlert.result.decision === 'NEEDS_CLARIFICATION' ? (
+                      <HelpCircle className="w-5 h-5" />
+                    ) : (
+                      <ShieldAlert className="w-5 h-5" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm sm:text-base font-bold">
+                        {validationAlert.result.decision === 'NEEDS_CLARIFICATION'
+                          ? 'Clarification Needed: Computer Science Connection'
+                          : 'Computer Science & Computing Topics Only'}
+                      </h3>
+                      <span
+                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+                          validationAlert.result.decision === 'NEEDS_CLARIFICATION'
+                            ? 'bg-amber-200/70 text-amber-900'
+                            : 'bg-rose-200/70 text-rose-900'
+                        }`}
+                      >
+                        {validationAlert.result.decision}
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm leading-relaxed font-medium">
+                      {validationAlert.result.message}
+                    </p>
+                    {validationAlert.result.reason && (
+                      <p className="text-xs opacity-80">
+                        Reason: {validationAlert.result.reason}
+                      </p>
+                    )}
+
+                    {validationAlert.result.decision === 'NEEDS_CLARIFICATION' && (
+                      <form onSubmit={handleSubmitClarification} className="pt-2 flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="text"
+                          value={clarificationText}
+                          onChange={(e) => setClarificationText(e.target.value)}
+                          placeholder="Explain how this relates to Computer Science (e.g., Data Structures, OOP, AI)..."
+                          className="flex-1 px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!clarificationText.trim() || isLoading}
+                          className="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white text-xs font-semibold cursor-pointer shrink-0"
+                        >
+                          Submit Clarification
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PROVIDER ERROR / MISSING KEY ALERT */}
+            {providerErrorAlert && (
+              <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 sm:p-6 shadow-xs space-y-3">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-amber-950">
+                      AI Provider Response Unavailable
+                    </h3>
+                    <p className="text-xs sm:text-sm text-amber-900 mt-1">
+                      {providerErrorAlert.error}
+                    </p>
+                  </div>
+                </div>
+                {providerErrorAlert.responses && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                    {Object.values(providerErrorAlert.responses).map((res) => (
+                      <AIResponseCard key={res.provider} response={res} defaultExpanded={true} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* LOADING STATE */}
             {isLoading && (
@@ -668,7 +944,7 @@ export default function App() {
                     synthesis={currentSession.synthesis}
                     question={currentSession.question}
                     responses={currentSession.responses}
-                    selectedModels={currentSession.selectedModels}
+                    selectedModels={currentSession.selectedModels || DEFAULT_MODELS}
                     onGenerateQuiz={() => setCurrentTab('quiz')}
                     onMakeNotes={() => setCurrentTab('notes')}
                     onExplainMoreSimply={handleExplainMoreSimply}
@@ -685,7 +961,7 @@ export default function App() {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                          Individual AI Perspectives ({currentSession.selectedModels.length})
+                          Individual AI Perspectives ({(currentSession.selectedModels || []).length})
                         </h3>
                         <p className="text-xs text-slate-500">
                           Expand any model to review its original unfiltered response and specialized approach.
@@ -694,8 +970,8 @@ export default function App() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      {currentSession.selectedModels.map(provider => {
-                        const res = currentSession.responses[provider];
+                      {(currentSession.selectedModels || []).map(provider => {
+                        const res = currentSession.responses?.[provider];
                         if (!res) return null;
                         return (
                           <AIResponseCard

@@ -37,9 +37,19 @@ export interface PracticeQuestion {
   hint?: string;
 }
 
+export type ValidationDecision = 'ALLOWED' | 'NOT_ALLOWED' | 'NEEDS_CLARIFICATION';
+
+export interface QuestionValidationResult {
+  decision: ValidationDecision;
+  reason: string;
+  message: string;
+  detectedDomain?: string;
+}
+
 export interface SynthesisResult {
   simpleExplanation: string;
   detailedExplanation: string;
+  howItWorks?: string;
   example: ExampleSection;
   importantPoints: string[];
   commonMistakes?: string[];
@@ -58,7 +68,7 @@ export interface FollowUpMessage {
   providerPerspective?: AIProvider;
 }
 
-export type QuizType = 'mcq' | 'true_false' | 'short_answer';
+export type QuizType = 'mcq' | 'true_false' | 'short_answer' | 'conceptual' | 'programming';
 
 export interface QuizQuestion {
   id: string;

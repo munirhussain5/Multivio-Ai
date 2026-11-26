@@ -1,54 +1,102 @@
-import React, { useState } from 'react';
-import { QuizData, QuizQuestion } from '../../types';
-import { 
-  CheckCircle2, 
-  XCircle, 
-  RotateCcw, 
-  Award, 
-  HelpCircle, 
+import React, { useEffect, useState } from 'react';
+import { QuizData, QuizQuestion, QuizType } from '../../types';
+import {
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  Award,
   ArrowRight,
   Sparkles,
-  BookOpen
+  BookOpen,
+  Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface QuizViewProps {
   quiz: QuizData;
   onUpdateQuiz: (updated: QuizData) => void;
+  onGenerateCustomQuiz?: (
+    topic: string,
+    count: number,
+    questionTypes: QuizType[]
+  ) => Promise<{ error?: string; rejectedMessage?: string }>;
   onBackToLesson?: () => void;
 }
 
 export const QuizView: React.FC<QuizViewProps> = ({
   quiz,
   onUpdateQuiz,
+  onGenerateCustomQuiz,
   onBackToLesson,
 }) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(quiz.completed);
   const [showReviewOnly, setShowReviewOnly] = useState(false);
 
+  // Custom CS quiz generator state
+  const [customTopic, setCustomTopic] = useState('');
+  const [questionCount, setQuestionCount] = useState<number>(5);
+  const [selectedTypeMode, setSelectedTypeMode] = useState<'mixed' | QuizType>('mixed');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAnswers({});
+    setIsSubmitted(quiz.completed);
+    setShowReviewOnly(false);
+  }, [quiz.id, quiz.completed]);
+
+  const handleGenerateClick = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onGenerateCustomQuiz || !customTopic.trim() || isGenerating) return;
+    setGenError(null);
+    setIsGenerating(true);
+    try {
+      const types: QuizType[] =
+        selectedTypeMode === 'mixed'
+          ? ['mcq', 'true_false', 'conceptual', 'programming', 'short_answer']
+          : [selectedTypeMode];
+
+      const result = await onGenerateCustomQuiz(customTopic.trim(), questionCount, types);
+      if (result.rejectedMessage) {
+        setGenError(result.rejectedMessage);
+      } else if (result.error) {
+        setGenError(result.error);
+      } else {
+        setCustomTopic('');
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleSelectOption = (questionId: string, option: string) => {
     if (isSubmitted) return;
-    setAnswers(prev => ({ ...prev, [questionId]: option }));
+    setAnswers((prev) => ({ ...prev, [questionId]: option }));
   };
 
   const handleTextAnswer = (questionId: string, text: string) => {
     if (isSubmitted) return;
-    setAnswers(prev => ({ ...prev, [questionId]: text }));
+    setAnswers((prev) => ({ ...prev, [questionId]: text }));
   };
 
   const handleSubmit = () => {
     let score = 0;
-    const evaluatedQuestions: QuizQuestion[] = quiz.questions.map(q => {
+    const evaluatedQuestions: QuizQuestion[] = quiz.questions.map((q) => {
       const userAns = (answers[q.id] || '').trim();
       let isCorrect = false;
 
-      if (q.type === 'short_answer') {
-        // Tolerant matching
+      if (q.type === 'mcq' || q.type === 'true_false') {
+        isCorrect = userAns.toLowerCase() === q.correctAnswer.toLowerCase();
+      } else {
         const cleanUser = userAns.toLowerCase().replace(/[^a-z0-9]/g, '');
         const cleanCorrect = q.correctAnswer.toLowerCase().replace(/[^a-z0-9]/g, '');
-        isCorrect = cleanUser === cleanCorrect || cleanUser.includes(cleanCorrect) || cleanCorrect.includes(cleanUser);
-      } else {
-        isCorrect = userAns.toLowerCase() === q.correctAnswer.toLowerCase();
+        if (cleanUser.length > 0 && cleanCorrect.length > 0) {
+          isCorrect =
+            cleanUser === cleanCorrect ||
+            cleanUser.includes(cleanCorrect) ||
+            cleanCorrect.includes(cleanUser);
+        }
       }
 
       if (isCorrect) score += 1;
@@ -76,7 +124,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
     setAnswers({});
     setIsSubmitted(false);
     setShowReviewOnly(false);
-    const resetQuestions = quiz.questions.map(q => ({
+    const resetQuestions = quiz.questions.map((q) => ({
       ...q,
       userAnswer: undefined,
       isCorrect: undefined,
@@ -90,9 +138,17 @@ export const QuizView: React.FC<QuizViewProps> = ({
     });
   };
 
+  const getTypeLabel = (t: QuizType) => {
+    if (t === 'mcq') return 'Multiple Choice';
+    if (t === 'true_false') return 'True / False';
+    if (t === 'programming') return 'Programming Question';
+    if (t === 'conceptual') return 'Conceptual Question';
+    return 'Short Answer';
+  };
+
   const totalQuestions = quiz.questions.length;
   const currentScore = quiz.score ?? 0;
-  const correctCount = quiz.questions.filter(q => q.isCorrect).length;
+  const correctCount = quiz.questions.filter((q) => q.isCorrect).length;
   const incorrectCount = totalQuestions - correctCount;
 
   return (
@@ -101,13 +157,13 @@ export const QuizView: React.FC<QuizViewProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-            Interactive Topic Assessment
+            Computer Science Topic Assessment
           </span>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
             Quiz: {quiz.topic}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Test and cement your understanding with multiple-choice, true/false, and short-answer questions.
+            Test your CS understanding with MCQs, conceptual, programming, true/false, and short-answer questions.
           </p>
         </div>
 
@@ -122,6 +178,76 @@ export const QuizView: React.FC<QuizViewProps> = ({
           </button>
         )}
       </div>
+
+      {/* Generate Custom CS Quiz Panel */}
+      {onGenerateCustomQuiz && (
+        <form
+          onSubmit={handleGenerateClick}
+          className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Generate Custom Computer Science Quiz</span>
+            </div>
+            <span className="text-[11px] text-slate-400">CS-only validated</span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={customTopic}
+              onChange={(e) => setCustomTopic(e.target.value)}
+              placeholder="e.g. Stacks and Queues in Data Structures"
+              className="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              disabled={isGenerating}
+            />
+            <select
+              value={selectedTypeMode}
+              onChange={(e) => setSelectedTypeMode(e.target.value as 'mixed' | QuizType)}
+              className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500"
+              disabled={isGenerating}
+            >
+              <option value="mixed">Mixed CS Types</option>
+              <option value="mcq">MCQs Only</option>
+              <option value="short_answer">Short Answer</option>
+              <option value="conceptual">Conceptual</option>
+              <option value="programming">Programming</option>
+            </select>
+            <select
+              value={questionCount}
+              onChange={(e) => setQuestionCount(Number(e.target.value))}
+              className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500"
+              disabled={isGenerating}
+            >
+              <option value={3}>3 Questions</option>
+              <option value={5}>5 Questions</option>
+              <option value={8}>8 Questions</option>
+            </select>
+            <button
+              type="submit"
+              disabled={!customTopic.trim() || isGenerating}
+              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <span>Generate Quiz</span>
+              )}
+            </button>
+          </div>
+
+          {genError && (
+            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>{genError}</span>
+            </div>
+          )}
+        </form>
+      )}
 
       {/* Results Banner (when submitted) */}
       {isSubmitted && (
@@ -175,9 +301,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
       {/* Question List */}
       <div className="space-y-4">
         {quiz.questions
-          .filter(q => !showReviewOnly || (isSubmitted && !q.isCorrect))
+          .filter((q) => !showReviewOnly || (isSubmitted && !q.isCorrect))
           .map((q, qIndex) => {
-            const isAnswered = Boolean(answers[q.id]);
             const isEvaluated = isSubmitted;
             const isCorrect = q.isCorrect;
 
@@ -199,7 +324,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                       Q{qIndex + 1}
                     </span>
                     <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                      · {q.type === 'mcq' ? 'Multiple Choice' : q.type === 'true_false' ? 'True / False' : 'Short Answer'}
+                      · {getTypeLabel(q.type)}
                     </span>
                   </div>
 
@@ -218,16 +343,17 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   )}
                 </div>
 
-                <h4 className="text-sm sm:text-base font-semibold text-slate-900 leading-snug mb-4">
+                <h4 className="text-sm sm:text-base font-semibold text-slate-900 leading-snug mb-4 whitespace-pre-wrap">
                   {q.question}
                 </h4>
 
                 {/* Question Options or Input */}
-                {q.type === 'mcq' || q.type === 'true_false' ? (
+                {(q.type === 'mcq' || q.type === 'true_false') && q.options && q.options.length > 0 ? (
                   <div className="space-y-2">
-                    {q.options?.map((option, optIdx) => {
+                    {q.options.map((option, optIdx) => {
                       const isSelected = answers[q.id] === option || q.userAnswer === option;
-                      const isCorrectChoice = isEvaluated && option.toLowerCase() === q.correctAnswer.toLowerCase();
+                      const isCorrectChoice =
+                        isEvaluated && option.toLowerCase() === q.correctAnswer.toLowerCase();
                       const isWrongChoice = isEvaluated && isSelected && !isCorrect;
 
                       return (
@@ -239,11 +365,11 @@ export const QuizView: React.FC<QuizViewProps> = ({
                               ? isCorrectChoice
                                 ? 'bg-emerald-100/70 border-emerald-400 text-emerald-950 font-bold'
                                 : isWrongChoice
-                                ? 'bg-rose-100/70 border-rose-400 text-rose-950'
-                                : 'bg-slate-50 border-slate-200 text-slate-500 opacity-60'
+                                  ? 'bg-rose-100/70 border-rose-400 text-rose-950'
+                                  : 'bg-slate-50 border-slate-200 text-slate-500 opacity-60'
                               : isSelected
-                              ? 'bg-indigo-50 border-indigo-400 text-indigo-950 ring-1 ring-indigo-300'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                                ? 'bg-indigo-50 border-indigo-400 text-indigo-950 ring-1 ring-indigo-300'
+                                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
                           }`}
                         >
                           <span>{option}</span>
@@ -263,8 +389,12 @@ export const QuizView: React.FC<QuizViewProps> = ({
                       type="text"
                       disabled={isEvaluated}
                       value={answers[q.id] || q.userAnswer || ''}
-                      onChange={e => handleTextAnswer(q.id, e.target.value)}
-                      placeholder="Type your concise answer here..."
+                      onChange={(e) => handleTextAnswer(q.id, e.target.value)}
+                      placeholder={
+                        q.type === 'programming'
+                          ? 'Type the code output or solution here...'
+                          : 'Type your concise answer here...'
+                      }
                       className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-100"
                     />
                   </div>
@@ -273,9 +403,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 {/* Explanation on evaluation */}
                 {isEvaluated && (
                   <div className="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-700 bg-white/70 p-3 rounded-lg">
-                    <p className="font-semibold text-slate-900 mb-1">
-                      Explanation:
-                    </p>
+                    <p className="font-semibold text-slate-900 mb-1">Explanation:</p>
                     <p>{q.explanation}</p>
                     {!isCorrect && (
                       <p className="mt-1.5 text-indigo-700 font-medium">
@@ -290,7 +418,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
       </div>
 
       {/* Submit Button */}
-      {!isSubmitted && (
+      {!isSubmitted && quiz.questions.length > 0 && (
         <div className="pt-2 pb-6 flex items-center justify-end">
           <button
             onClick={handleSubmit}

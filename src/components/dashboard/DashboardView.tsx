@@ -48,7 +48,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
   // Compute activity stats
   const questionsAsked = sessions.length;
-  const topicsStudied = new Set(sessions.map(s => s.question.toLowerCase())).size;
+  const topicsStudied = new Set(sessions.map(s => (s.question || '').toLowerCase())).size;
   const completedQuizzes = sessions.filter(s => s.quiz?.completed).map(s => s.quiz!);
   const quizCount = completedQuizzes.length;
   
@@ -64,7 +64,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     { title: 'Database Systems', query: 'Explain Database Normalization from 1NF through 3NF with tables.' },
     { title: 'Computer Networks', query: 'How does the TCP/IP 3-Way Handshake establish a reliable connection?' },
     { title: 'Artificial Intelligence', query: 'How does Gradient Descent work in training neural networks?' },
-    { title: 'Biology & Science', query: 'Explain photosynthesis: Light-dependent reactions vs the Calvin cycle.' },
+    { title: 'Operating Systems', query: 'Explain CPU scheduling, deadlocks, and virtual memory paging in operating systems.' },
   ];
 
   return (
@@ -73,13 +73,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs">
         <div className="relative z-10 max-w-2xl">
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            Student Learning Hub
+            Your AI Learning Assistant for Computer Science
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">
             Welcome back to Multivio!
           </h2>
           <p className="text-sm sm:text-base text-indigo-200 mt-2 leading-relaxed">
-            Your cross-model educational center. Compare ChatGPT, Gemini, Claude, and DeepSeek to master any subject with maximum retention.
+            Learn programming, databases, algorithms, networking, artificial intelligence, and more with multiple AI models in one place.
           </p>
 
           <button
@@ -252,7 +252,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {s.title || s.question}
                   </h4>
                   <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                    <span>{s.selectedModels.length} AI perspectives</span>
+                    <span>{(s.selectedModels || []).length} AI perspectives</span>
                     <span>·</span>
                     <span>{new Date(s.timestamp).toLocaleDateString()}</span>
                   </div>

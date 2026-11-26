@@ -59,7 +59,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
 
       {/* Messages Feed */}
       <div className="p-5 space-y-4 max-h-[500px] overflow-y-auto">
-        {session.followUps.length === 0 ? (
+        {(session.followUps || []).length === 0 ? (
           <div className="text-center py-6 px-4">
             <p className="text-sm text-slate-600 font-medium">
               Have questions about this lesson?
@@ -84,7 +84,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             </div>
           </div>
         ) : (
-          session.followUps.map((msg, index) => {
+          (session.followUps || []).map((msg, index) => {
             const isTargetStyled = index === 2 || msg.sender === 'student';
             return (
               <div
